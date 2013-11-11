@@ -16,7 +16,6 @@ class window.RbtNode
     switch  # HACK: for debugging only!  TODO: replace this with code that may work
       when i.key < @key then @left = i
       when i.key > @key then @right = i
-    @children[0] = @left
-    @children[1] = @right
+    @children = [@left, @right]
 
   delete: (i) ->
