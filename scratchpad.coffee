@@ -1,36 +1,78 @@
-# parent = new RbtNode(5, 5)
-# parent.insert new RbtNode(1, 1)
-# parent.insert new RbtNode(10, 10)
-
-# d = [parent, parent.left, parent.right]
-
 points = []
-mousedown = ->
-  point = d3.mouse(this)
-  points[points.length] = {x: point[0], y: point[1]}
-  svg.selectAll("circle").data(points).enter().append("circle")
-                                                .attr("cx", (n) -> n.x)
-                                                .attr("cy", (n) -> n.y)
-                                                .attr("r", "5")
-                                                .call(d3.behavior.drag())
+lines = []
+keyAlreadyDown = false
+addEdgeMode = false
+tentativeEdge = null
 
 svg = d3.select("body").append("svg")
                        .attr("width", 700)
                        .attr("height", 400)
-                       .on("mousedown", mousedown)
+edges = svg.append("svg:g").selectAll("line")
+vertices = svg.append("svg:g").selectAll("circle")
 
-# cluster = d3.layout.cluster().size(400, 700)
+keyup = ->
+  keyAlreadyDown = false
+  addEdgeMode = false
 
-# nodes = cluster.nodes(parent)
-# links = cluster.links(nodes)
+keydown = ->
+  d3.event.preventDefault()
+  return if keyAlreadyDown
+  keyAlreadyDown = true
+  if d3.event.keyCode == 16
+    addEdgeMode = true
 
-# node = svg.selectAll(".node").data(nodes).enter().append("circle")
-#                                                  .attr("class", "node")
-#                                                  .attr("cx", (n) -> n.key*10)
-#                                                  .attr("cy", (n) -> n.key*10)
-#                                                  .attr("r", "5")
+dragstarted = (d) ->
+  d3.event.sourceEvent.stopPropagation
+  s = d3.select(this).classed("dragging", true)
+  if addEdgeMode
+    tentativeEdge = {origin: s
+                     , line: svg.append("line")
+                                  .attr("x1", s.attr("cx"))
+                                  .attr("y1", s.attr("cy")) }
 
-# circle = svg.selectAll("circle").data(points)
-# enter = circle.enter().append("circle").attr("cy", (n) -> n.y).attr("r", "5")
+dragmove = (d) ->
+  if tentativeEdge?
+    tentativeEdge.line.attr("x2", d3.event.x).attr("y2", d3.event.y)
+  else
+    d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y)
 
-# circle = svg.selectAll("circle").data(d).enter().append("circle").attr("cy", 90).attr("cx", (n)->10*n.key).attr("r", 10);
+dragended = (d) ->
+  d3.select(this).classed("dragging", false)
+  d3.select(this).datum().x = 1 * d3.select(this).attr("cx")  # *1 here is a typecast to int
+  d3.select(this).datum().y = 1 * d3.select(this).attr("cy")
+  tentativeEdge = null
+
+drag = d3.behavior.drag()
+  .on("drag", dragmove)
+  .on("dragstart", dragstarted)
+  .on("dragend", dragended)
+
+click = ->
+  return if d3.event.defaultPrevented
+  points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1], id: points.length}
+  reset()
+
+# mousedown = ->
+  # alert "shift" if d3.event.shiftKey
+
+reset = ->
+  vertices = vertices.data(points)
+  vertices.enter().append("circle")
+                                                .attr("cx", (n) -> n.x)
+                                                .attr("cy", (n) -> n.y)
+                                                .attr("r", "5")
+                                                .attr("class", "dot")
+                                                .style("cursor", "pointer")
+                                                .call(drag)
+
+d3.select(window).on("keyup", keyup).on("keydown", keydown)
+
+svg.on("click", click)
+                       # .on("mousedown", mousedown)
+
+# svg.selectAll("circle").data([{x:5, y:100}, {x:20, y:50}]).enter().append("circle")
+#                                             .attr("cx", (n) -> n.x)
+#                                             .attr("cy", (n) -> n.y)
+#                                             .attr("r", "5")
+#                                             .attr("class", "dot")
+#                                             .call(drag)

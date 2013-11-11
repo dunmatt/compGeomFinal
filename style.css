@@ -1,0 +1,17 @@
+.dot {
+  fill: lightsteelblue;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.dragging {
+  fill: red;
+  stroke: brown;
+}
+
+line {
+  /*fill: none;*/
+  stroke: #999;
+  /*shape-rendering: crispEdges;*/
+  vector-effect: non-scaling-stroke;
+}
