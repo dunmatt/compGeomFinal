@@ -8,6 +8,7 @@ radius = 5
 svg = d3.select("body").append("svg")
                        .attr("width", 700)
                        .attr("height", 400)
+slabLines = svg.append("svg:g").selectAll("line")
 edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
 
@@ -35,7 +36,8 @@ dragmove = (d) ->
   if tentativeEdge?
     tentativeEdge.line.attr("x2", d3.event.x).attr("y2", d3.event.y)
   else
-    d3.select(this).attr("cx", d3.event.x).attr("cy", d3.event.y)
+    d3.select(this).datum().x = d3.event.x
+    d3.select(this).datum().y = d3.event.y
     reset()
 
 dragended = (d) ->
@@ -49,9 +51,6 @@ dragended = (d) ->
                        lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t})
     tentativeEdge.line.remove()
     tentativeEdge = null
-  else
-    d3.select(this).datum().x = 1 * d3.select(this).attr("cx")  # *1 here is a typecast to int
-    d3.select(this).datum().y = 1 * d3.select(this).attr("cy")
   reset()
 
 drag = d3.behavior.drag()
@@ -65,29 +64,37 @@ click = ->
   reset()
 
 reset = ->
+  drawEdges()
+  drawVertices()
+
+drawSlabs = ->
+  slabLines = slabLines.data(points)
+
+drawEdges = ->
   edges = edges.data(lines)
                .attr("x1", (l) -> l.a.x)
                .attr("y1", (l) -> l.a.y)
                .attr("x2", (l) -> l.b.x)
                .attr("y2", (l) -> l.b.y)
-  edges.exit().remove()
   edges.enter().append("line")
                .attr("x1", (l) -> l.a.x)
                .attr("y1", (l) -> l.a.y)
                .attr("x2", (l) -> l.b.x)
                .attr("y2", (l) -> l.b.y)
+  edges.exit().remove()
 
+drawVertices = ->
   vertices = vertices.data(points)
-  vertices.exit().remove()
+                     .attr("cx", (v) -> v.x)
+                     .attr("cy", (v) -> v.y)
   vertices.enter().append("circle")
-                  .attr("cx", (n) -> n.x)
-                  .attr("cy", (n) -> n.y)
+                  .attr("cx", (v) -> v.x)
+                  .attr("cy", (v) -> v.y)
                   .attr("r", radius)
                   .attr("class", "dot")
                   .style("cursor", "pointer")
                   .call(drag)
+  vertices.exit().remove()
 
 d3.select(window).on("keyup", keyup).on("keydown", keydown)
-
 svg.on("click", click)
-
