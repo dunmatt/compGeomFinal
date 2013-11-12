@@ -10,9 +10,16 @@ height = 400
 svg = d3.select("body").append("svg")
                        .attr("width", 700)
                        .attr("height", height)
+                       .attr("class", "editMode")
 slabLines = svg.append("svg:g").selectAll("line")
 edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
+
+addEdge = (v, e) -> v.edges[v.edges.length] = e
+
+deleteVertex = (v) ->
+  lines = (l for l in lines when l not in v.edges)
+  points = (p for p in points when p isnt v)
 
 keyup = ->
   keyAlreadyDown = false
@@ -55,8 +62,9 @@ dragended = (d) ->
                      x = t.x - m[0]
                      y = t.y - m[1]
                      if Math.sqrt(x*x + y*y) < radius
-                       lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t})
-    # TODO: add delete support
+                       lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
+                       addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
+                       addEdge(t, lines[lines.length-1]) )
     tentativeEdge.line.remove()
     tentativeEdge = null
   reset()
@@ -69,13 +77,14 @@ drag = d3.behavior.drag()
 click = ->
   return if d3.event.defaultPrevented
   if deleteMode
+    m = d3.mouse(this)
     points.forEach((t) ->
                      x = t.x - m[0]
                      y = t.y - m[1]
                      if Math.sqrt(x*x + y*y) < radius
-                       lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t})
+                       deleteVertex(t))
   else
-    points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}
+    points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1], edges: []}
   reset()
 
 reset = ->

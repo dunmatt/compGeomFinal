@@ -19,3 +19,7 @@ line.slabWall {
   shape-rendering: crispEdges;
   stroke: #ddd;
 }
+
+.editMode .slabWall {
+  visibility: hidden;
+}
