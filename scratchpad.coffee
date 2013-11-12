@@ -2,12 +2,14 @@ points = []
 lines = []
 keyAlreadyDown = false
 addEdgeMode = false
+deleteMode = false
 tentativeEdge = null
 radius = 5
+height = 400
 
 svg = d3.select("body").append("svg")
                        .attr("width", 700)
-                       .attr("height", 400)
+                       .attr("height", height)
 slabLines = svg.append("svg:g").selectAll("line")
 edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
@@ -15,6 +17,7 @@ vertices = svg.append("svg:g").selectAll("circle")
 keyup = ->
   keyAlreadyDown = false
   addEdgeMode = false
+  deleteMode = false
 
 keydown = ->
   d3.event.preventDefault()
@@ -22,6 +25,8 @@ keydown = ->
   keyAlreadyDown = true
   if d3.event.keyCode == 16
     addEdgeMode = true
+  else if d3.event.keyCode == 17
+    deleteMode = true
 
 dragstarted = (d) ->
   d3.event.sourceEvent.stopPropagation
@@ -30,7 +35,9 @@ dragstarted = (d) ->
     tentativeEdge = {origin: s
                      , line: svg.append("line")
                                 .attr("x1", s.attr("cx"))
-                                .attr("y1", s.attr("cy")) }
+                                .attr("y1", s.attr("cy"))
+                                .attr("x2", s.attr("cx"))
+                                .attr("y2", s.attr("cy")) }
 
 dragmove = (d) ->
   if tentativeEdge?
@@ -49,6 +56,7 @@ dragended = (d) ->
                      y = t.y - m[1]
                      if Math.sqrt(x*x + y*y) < radius
                        lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t})
+    # TODO: add delete support
     tentativeEdge.line.remove()
     tentativeEdge = null
   reset()
@@ -60,15 +68,32 @@ drag = d3.behavior.drag()
 
 click = ->
   return if d3.event.defaultPrevented
-  points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}
+  if deleteMode
+    points.forEach((t) ->
+                     x = t.x - m[0]
+                     y = t.y - m[1]
+                     if Math.sqrt(x*x + y*y) < radius
+                       lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t})
+  else
+    points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1]}
   reset()
 
 reset = ->
+  drawSlabs()
   drawEdges()
   drawVertices()
 
 drawSlabs = ->
   slabLines = slabLines.data(points)
+                       .attr("x1", (v) -> v.x)
+                       .attr("x2", (v) -> v.x)
+  slabLines.enter().append("line")
+                   .attr("x1", (v) -> v.x)
+                   .attr("x2", (v) -> v.x)
+                   .attr("y1", (v) -> 0)
+                   .attr("y2", (v) -> height)
+                   .attr("class", "slabWall")
+  slabLines.exit().remove()
 
 drawEdges = ->
   edges = edges.data(lines)

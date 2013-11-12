@@ -11,6 +11,11 @@
 
 line {
   /*fill: none;*/
-  stroke: #999;
-  vector-effect: non-scaling-stroke;
+  stroke: #955;
+  /*vector-effect: non-scaling-stroke;*/
+}
+
+line.slabWall {
+  shape-rendering: crispEdges;
+  stroke: #ddd;
 }
