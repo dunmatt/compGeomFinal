@@ -6,11 +6,14 @@ deleteMode = false
 tentativeEdge = null
 radius = 5
 height = 400
+editModeClass = "editMode"
+edgeModeClass = "edgeMode"
+deleteModeClass = "deleteMode"
 
 svg = d3.select("body").append("svg")
                        .attr("width", 700)
                        .attr("height", height)
-                       .attr("class", "editMode")
+                       .attr("class", editModeClass)
 slabLines = svg.append("svg:g").selectAll("line")
 edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
@@ -25,6 +28,8 @@ keyup = ->
   keyAlreadyDown = false
   addEdgeMode = false
   deleteMode = false
+  svg.classed(edgeModeClass, false)
+  svg.classed(deleteModeClass, false)
 
 keydown = ->
   d3.event.preventDefault()
@@ -32,8 +37,10 @@ keydown = ->
   keyAlreadyDown = true
   if d3.event.keyCode == 16
     addEdgeMode = true
+    svg.classed(edgeModeClass, true)
   else if d3.event.keyCode == 17
     deleteMode = true
+    svg.classed(deleteModeClass, true)
 
 dragstarted = (d) ->
   d3.event.sourceEvent.stopPropagation
@@ -126,9 +133,11 @@ drawVertices = ->
                   .attr("cy", (v) -> v.y)
                   .attr("r", radius)
                   .attr("class", "dot")
-                  .style("cursor", "pointer")
                   .call(drag)
   vertices.exit().remove()
 
-d3.select(window).on("keyup", keyup).on("keydown", keydown)
 svg.on("click", click)
+d3.select(window).on("keyup", keyup).on("keydown", keydown).on("mousedown", -> d3.event.preventDefault())
+d3.select("body").append("button")
+                 .text("Toggle Query Mode")
+                 .on("click", -> svg.classed(editModeClass, not svg.classed(editModeClass)))

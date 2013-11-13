@@ -1,7 +1,16 @@
 .dot {
+  cursor: pointer;
   fill: lightsteelblue;
   stroke: steelblue;
   stroke-width: 1.5px;
+}
+
+.edgeMode .dot {
+  cursor: auto;
+}
+
+.deleteMode .dot {
+  cursor: crosshair;
 }
 
 .dragging {
