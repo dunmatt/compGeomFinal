@@ -1,7 +1,7 @@
 class window.RbtNode
   constructor: (@key, @value) ->
     @parent = null
-    @black = false
+    @red = true
     @children = []
     @left  = null
     @right = null
@@ -13,8 +13,10 @@ class window.RbtNode
       when k > @key then @right?.access(k)
 
   insert: (i) ->
-    switch  # HACK: for debugging only!  TODO: replace this with code that may work
+    switch
+      when i.key < @key and @left then @left.insert i
       when i.key < @key then @left = i
+      when i.key > @key and @right then @right.insert i
       when i.key > @key then @right = i
     @children = [@left, @right]
 

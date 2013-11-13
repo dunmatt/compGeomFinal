@@ -1,6 +1,7 @@
 points = []
 lines = []
 keyAlreadyDown = false
+editMode = true
 addEdgeMode = false
 deleteMode = false
 tentativeEdge = null
@@ -136,8 +137,12 @@ drawVertices = ->
                   .call(drag)
   vertices.exit().remove()
 
+toggleEditMode = ->
+  editMode = not svg.classed(editModeClass)
+  svg.classed(editModeClass, editMode)
+
 svg.on("click", click)
 d3.select(window).on("keyup", keyup).on("keydown", keydown).on("mousedown", -> d3.event.preventDefault())
 d3.select("body").append("button")
                  .text("Toggle Query Mode")
-                 .on("click", -> svg.classed(editModeClass, not svg.classed(editModeClass)))
+                 .on("click", toggleEditMode)

@@ -7,7 +7,7 @@
       this.key = key;
       this.value = value;
       this.parent = null;
-      this.black = false;
+      this.red = true;
       this.children = [];
       this.left = null;
       this.right = null;
@@ -27,8 +27,14 @@
 
     RbtNode.prototype.insert = function(i) {
       switch (false) {
+        case !(i.key < this.key && this.left):
+          this.left.insert(i);
+          break;
         case !(i.key < this.key):
           this.left = i;
+          break;
+        case !(i.key > this.key && this.right):
+          this.right.insert(i);
           break;
         case !(i.key > this.key):
           this.right = i;
