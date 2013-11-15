@@ -28,21 +28,110 @@
     RbtNode.prototype.insert = function(i) {
       switch (false) {
         case !(i.key < this.key && this.left):
-          this.left.insert(i);
+          this.left = this.left.insert(i);
           break;
         case !(i.key < this.key):
           this.left = i;
+          i._cleanUp;
           break;
         case !(i.key > this.key && this.right):
-          this.right.insert(i);
+          this.right = this.right.insert(i);
           break;
         case !(i.key > this.key):
           this.right = i;
+          i._cleanUp;
       }
       return this.children = [this.left, this.right];
     };
 
     RbtNode.prototype["delete"] = function(i) {};
+
+    RbtNode.prototype._cleanUp = function() {
+      var og, _ref, _ref1, _ref2;
+      if (this.red && ((_ref = this.parent) != null ? _ref.red : void 0)) {
+        if ((_ref1 = this._uncle) != null ? _ref1.red : void 0) {
+          this.parent.red = false;
+          this._uncle.red = false;
+          this.parent.parent.red = true;
+          return this.parent.parent._cleanUp;
+        } else if (!((_ref2 = this.parent) != null ? _ref2.parent : void 0)) {
+          return this.parent.red = false;
+        } else {
+          og = this.parent.parent;
+          if (this.parent._leftChild) {
+            if (this._rightChild) {
+              this._rotateLeft(this.parent);
+            }
+            og.red = true;
+            og.left.red = false;
+            return this._rotateRight(og);
+          } else {
+            if (this._leftChild) {
+              this._rotateRight(this.parent);
+            }
+            og.red = true;
+            og.right.red = false;
+            return this._rotateLeft(og);
+          }
+        }
+      }
+    };
+
+    RbtNode.prototype._rotateLeft = function(root) {
+      var B, x, y;
+      if (root != null ? root.right : void 0) {
+        x = root;
+        y = x.right;
+        B = y.left;
+        x.right = B;
+        y.left = x;
+        if (root._leftChild) {
+          return root.parent.left = y;
+        } else if (root._rightChild) {
+          return root.parent.right = y;
+        }
+      }
+    };
+
+    RbtNode.prototype._rotateRight = function(root) {
+      var B, x, y;
+      if (root != null ? root.left : void 0) {
+        y = root;
+        x = y.left;
+        B = x.right;
+        x.right = y;
+        y.left = B;
+        if (root._leftChild) {
+          return root.parent.left = x;
+        } else if (root._rightChild) {
+          return root.parent.right = x;
+        }
+      }
+    };
+
+    RbtNode.prototype._uncle = function() {
+      var _ref;
+      return (_ref = this.parent) != null ? _ref.brother : void 0;
+    };
+
+    RbtNode.prototype._brother = function() {
+      var _ref, _ref1;
+      if (this._leftChild) {
+        return (_ref = this.parent) != null ? _ref.right : void 0;
+      } else {
+        return (_ref1 = this.parent) != null ? _ref1.left : void 0;
+      }
+    };
+
+    RbtNode.prototype._leftChild = function() {
+      var _ref;
+      return this === ((_ref = this.parent) != null ? _ref.left : void 0);
+    };
+
+    RbtNode.prototype._rightChild = function() {
+      var _ref;
+      return this === ((_ref = this.parent) != null ? _ref.right : void 0);
+    };
 
     return RbtNode;
 
