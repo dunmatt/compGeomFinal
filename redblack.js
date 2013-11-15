@@ -32,29 +32,30 @@
           break;
         case !(i.key < this.key):
           this.left = i;
-          i._cleanUp;
+          i._cleanUpAfterInsert;
           break;
         case !(i.key > this.key && this.right):
           this.right = this.right.insert(i);
           break;
         case !(i.key > this.key):
           this.right = i;
-          i._cleanUp;
+          i._cleanUpAfterInsert;
       }
       return this.children = [this.left, this.right];
     };
 
     RbtNode.prototype["delete"] = function(i) {};
 
-    RbtNode.prototype._cleanUp = function() {
-      var og, _ref, _ref1, _ref2;
-      if (this.red && ((_ref = this.parent) != null ? _ref.red : void 0)) {
-        if ((_ref1 = this._uncle) != null ? _ref1.red : void 0) {
-          this.parent.red = false;
-          this._uncle.red = false;
-          this.parent.parent.red = true;
-          return this.parent.parent._cleanUp;
-        } else if (!((_ref2 = this.parent) != null ? _ref2.parent : void 0)) {
+    RbtNode.prototype._cleanUpAfterInsert = function() {
+      var og, _ref, _ref1, _ref2, _ref3;
+      if (this.red && ((_ref = this.parent) != null ? _ref.red : void 0) && ((_ref1 = this._uncle) != null ? _ref1.red : void 0)) {
+        this.parent.red = false;
+        this._uncle.red = false;
+        this.parent.parent.red = true;
+        this.parent.parent._cleanUpAfterInsert;
+      }
+      if (this.red && ((_ref2 = this.parent) != null ? _ref2.red : void 0)) {
+        if (!((_ref3 = this.parent) != null ? _ref3.parent : void 0)) {
           return this.parent.red = false;
         } else {
           og = this.parent.parent;

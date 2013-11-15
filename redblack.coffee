@@ -15,21 +15,21 @@ class window.RbtNode
   insert: (i) ->
     switch
       when i.key < @key and @left then @left = @left.insert i
-      when i.key < @key then @left = i; i._cleanUp
+      when i.key < @key then @left = i; i._cleanUpAfterInsert
       when i.key > @key and @right then @right = @right.insert i
-      when i.key > @key then @right = i; i._cleanUp
+      when i.key > @key then @right = i; i._cleanUpAfterInsert
     @children = [@left, @right]
 
   delete: (i) ->
 
-  _cleanUp: ->
-    if @red and @parent?.red
-      if @_uncle?.red  # condition 4a in "Planar point location using persistent search trees"
+  _cleanUpAfterInsert: ->
+    if @red and @parent?.red and @_uncle?.red  # condition 4a in "Planar point location using persistent search trees"
         @parent.red = false
         @_uncle.red = false
         @parent.parent.red = true
-        @parent.parent._cleanUp
-      else if not @parent?.parent  # condition 4b
+        @parent.parent._cleanUpAfterInsert
+    if @red and @parent?.red
+      if not @parent?.parent  # condition 4b
         @parent.red = false
       else
         og = @parent.parent
