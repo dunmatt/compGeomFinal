@@ -17,7 +17,7 @@
       var _ref, _ref1;
       switch (false) {
         case k !== this.key:
-          return this.value;
+          return this;
         case !(k < this.key):
           return (_ref = this.left) != null ? _ref.access(k) : void 0;
         case !(k > this.key):
@@ -28,20 +28,21 @@
     RbtNode.prototype.insert = function(i) {
       switch (false) {
         case !(i.key < this.key && this.left):
-          this.left = this.left.insert(i);
+          this.left.insert(i);
           break;
         case !(i.key < this.key):
           this.left = i;
-          i._cleanUpAfterInsert;
+          i.parent = this;
           break;
         case !(i.key > this.key && this.right):
-          this.right = this.right.insert(i);
+          this.right.insert(i);
           break;
         case !(i.key > this.key):
           this.right = i;
-          i._cleanUpAfterInsert;
+          i.parent = this;
       }
-      return this.children = [this.left, this.right];
+      i._cleanUpAfterInsert();
+      return this._updateChildren();
     };
 
     RbtNode.prototype["delete"] = function(i) {
@@ -54,34 +55,45 @@
         case !(i.key > this.key && right):
           this.right["delete"](i);
       }
-      return this.children = [this.left, this.right];
+      return this._updateChildren();
+    };
+
+    RbtNode.prototype._updateChildren = function() {
+      this.children = [];
+      switch (false) {
+        case !(this.left && this.right):
+          return this.children = [this.left, this.right];
+        case !this.left:
+          return this.children = [this.left];
+        case !this.right:
+          return this.children = [this.right];
+      }
     };
 
     RbtNode.prototype._cleanUpAfterInsert = function() {
       var og, _ref, _ref1, _ref2, _ref3;
-      if (this.red && ((_ref = this.parent) != null ? _ref.red : void 0) && ((_ref1 = this._uncle) != null ? _ref1.red : void 0)) {
+      if (this.red && ((_ref = this.parent) != null ? _ref.red : void 0) && ((_ref1 = this._uncle()) != null ? _ref1.red : void 0)) {
         this.parent.red = false;
-        this._uncle.red = false;
+        this._uncle().red = false;
         this.parent.parent.red = true;
-        this.parent.parent._cleanUpAfterInsert;
+        this.parent.parent._cleanUpAfterInsert();
       }
       if (this.red && ((_ref2 = this.parent) != null ? _ref2.red : void 0)) {
         if (!((_ref3 = this.parent) != null ? _ref3.parent : void 0)) {
           return this.parent.red = false;
         } else {
           og = this.parent.parent;
-          if (this.parent._leftChild) {
-            if (this._rightChild) {
+          og.red = true;
+          if (this.parent._isLeftChild()) {
+            if (this._isRightChild()) {
               this._rotateLeft(this.parent);
             }
-            og.red = true;
             og.left.red = false;
             return this._rotateRight(og);
           } else {
-            if (this._leftChild) {
+            if (this._isLeftChild()) {
               this._rotateRight(this.parent);
             }
-            og.red = true;
             og.right.red = false;
             return this._rotateLeft(og);
           }
@@ -90,59 +102,79 @@
     };
 
     RbtNode.prototype._rotateLeft = function(root) {
-      var B, x, y;
+      var B, x, y, _ref;
       if (root != null ? root.right : void 0) {
         x = root;
         y = x.right;
         B = y.left;
         x.right = B;
         y.left = x;
-        if (root._leftChild) {
-          return root.parent.left = y;
-        } else if (root._rightChild) {
-          return root.parent.right = y;
+        if (root._isLeftChild()) {
+          root.parent.left = y;
+        } else if (root._isRightChild()) {
+          root.parent.right = y;
         }
+        y.parent = x.parent;
+        x.parent = y;
+        if (B) {
+          B.parent = x;
+        }
+        x._updateChildren();
+        y._updateChildren();
+        return (_ref = y.parent) != null ? _ref._updateChildren() : void 0;
       }
     };
 
     RbtNode.prototype._rotateRight = function(root) {
-      var B, x, y;
+      var B, x, y, _ref;
       if (root != null ? root.left : void 0) {
         y = root;
         x = y.left;
         B = x.right;
         x.right = y;
         y.left = B;
-        if (root._leftChild) {
-          return root.parent.left = x;
-        } else if (root._rightChild) {
-          return root.parent.right = x;
+        if (root._isLeftChild()) {
+          root.parent.left = x;
+        } else if (root._isRightChild()) {
+          root.parent.right = x;
         }
+        x.parent = y.parent;
+        y.parent = x;
+        if (B) {
+          B.parent = y;
+        }
+        x._updateChildren();
+        y._updateChildren();
+        return (_ref = x.parent) != null ? _ref._updateChildren() : void 0;
       }
     };
 
     RbtNode.prototype._uncle = function() {
       var _ref;
-      return (_ref = this.parent) != null ? _ref.brother : void 0;
+      return (_ref = this.parent) != null ? _ref._brother() : void 0;
     };
 
     RbtNode.prototype._brother = function() {
       var _ref, _ref1;
-      if (this._leftChild) {
+      if (this._isLeftChild()) {
         return (_ref = this.parent) != null ? _ref.right : void 0;
       } else {
         return (_ref1 = this.parent) != null ? _ref1.left : void 0;
       }
     };
 
-    RbtNode.prototype._leftChild = function() {
+    RbtNode.prototype._isLeftChild = function() {
       var _ref;
       return this === ((_ref = this.parent) != null ? _ref.left : void 0);
     };
 
-    RbtNode.prototype._rightChild = function() {
+    RbtNode.prototype._isRightChild = function() {
       var _ref;
       return this === ((_ref = this.parent) != null ? _ref.right : void 0);
+    };
+
+    RbtNode.prototype.toString = function() {
+      return this.key + (this.red ? " red " : " black ") + (this.parent ? " P:" + this.parent.key : "") + (this.left ? " L:" + this.left.key : "") + (this.right ? " R:" + this.right.key : "") + " \[\n" + this.children + " \]\n";
     };
 
     return RbtNode;

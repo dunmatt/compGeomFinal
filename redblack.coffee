@@ -8,48 +8,55 @@ class window.RbtNode
 
   access: (k) ->
     switch
-      when k == @key then @value
+      when k == @key then this
       when k < @key then @left?.access(k)
       when k > @key then @right?.access(k)
 
   insert: (i) ->
     switch
-      when i.key < @key and @left then @left = @left.insert i
-      when i.key < @key then @left = i; i._cleanUpAfterInsert
-      when i.key > @key and @right then @right = @right.insert i
-      when i.key > @key then @right = i; i._cleanUpAfterInsert
-    @children = [@left, @right]
+      when i.key < @key and @left then @left.insert(i)
+      when i.key < @key then @left = i; i.parent = this
+      when i.key > @key and @right then @right.insert(i)
+      when i.key > @key then @right = i; i.parent = this
+    i._cleanUpAfterInsert()
+    @_updateChildren()
 
   delete: (i) ->
     switch
       when i.key is @key then
-      when i.key < @key and left then @left.delete i
-      when i.key > @key and right then @right.delete i
-    @children = [@left, @right]
+      when i.key < @key and left then @left.delete(i)
+      when i.key > @key and right then @right.delete(i)
+    @_updateChildren()
+
+  _updateChildren: ->
+    @children = []
+    switch
+      when @left and @right then @children = [@left, @right]
+      when @left then @children = [@left]
+      when @right then @children = [@right]
 
   _cleanUpAfterInsert: ->
-    if @red and @parent?.red and @_uncle?.red  # condition 4a in "Planar point location using persistent search trees"
-        @parent.red = false
-        @_uncle.red = false
-        @parent.parent.red = true
-        @parent.parent._cleanUpAfterInsert
+    if @red and @parent?.red and @_uncle()?.red  # condition 4a in "Planar point location using persistent search trees"
+      @parent.red = false
+      @_uncle().red = false
+      @parent.parent.red = true
+      @parent.parent._cleanUpAfterInsert()
     if @red and @parent?.red
       if not @parent?.parent  # condition 4b
         @parent.red = false
       else
         og = @parent.parent
-        if @parent._leftChild  # condition 4cd
-          if @_rightChild  # condition 4d
-            @_rotateLeft @parent
-          og.red = true
-          og.left.red = false
-          @_rotateRight og
+        og.red = true
+        if @parent._isLeftChild()  # condition 4cd
+          if @_isRightChild()  # condition 4d
+            @_rotateLeft(@parent)
+          og.left.red = false  # NOTE: this is here because og.left may change in a rotate left
+          @_rotateRight(og)
         else  # condition 4cd
-          if @_leftChild  # condition 4d
-            @_rotateRight @parent
-          og.red = true
-          og.right.red = false
-          @_rotateLeft og
+          if @_isLeftChild()  # condition 4d
+            @_rotateRight(@parent)
+          og.right.red = false  # NOTE: this is here because og.right may change in a rotate right
+          @_rotateLeft(og)
 
   _rotateLeft: (root) ->
     if root?.right
@@ -58,10 +65,17 @@ class window.RbtNode
       B = y.left
       x.right = B
       y.left = x
-      if root._leftChild
+      if root._isLeftChild()
         root.parent.left = y
-      else if root._rightChild
+      else if root._isRightChild()
         root.parent.right = y
+      y.parent = x.parent
+      x.parent = y
+      if B
+        B.parent = x
+      x._updateChildren()
+      y._updateChildren()
+      y.parent?._updateChildren()
 
   _rotateRight: (root) ->
     if root?.left
@@ -70,18 +84,27 @@ class window.RbtNode
       B = x.right
       x.right = y
       y.left = B
-      if root._leftChild
+      if root._isLeftChild()
         root.parent.left = x
-      else if root._rightChild
+      else if root._isRightChild()
         root.parent.right = x
+      x.parent = y.parent
+      y.parent = x
+      if B
+        B.parent = y
+      x._updateChildren()
+      y._updateChildren()
+      x.parent?._updateChildren()
 
-  _uncle: -> @parent?.brother  # TODO: is this still needed?
+  _uncle: -> @parent?._brother()  # TODO: is this still needed?
 
   _brother: ->
-    if @_leftChild
+    if @_isLeftChild()
       @parent?.right
     else
       @parent?.left
 
-  _leftChild: -> this is @parent?.left
-  _rightChild: -> this is @parent?.right
+  _isLeftChild: -> this is @parent?.left
+  _isRightChild: -> this is @parent?.right
+
+  toString: -> @key + (if @red then " red " else " black ") + (if @parent then " P:" + @parent.key else "") +  (if @left then " L:" + @left.key else "") + (if @right then " R:" + @right.key else "") + " \[\n" + @children + " \]\n"
