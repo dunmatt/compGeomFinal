@@ -44,7 +44,18 @@
       return this.children = [this.left, this.right];
     };
 
-    RbtNode.prototype["delete"] = function(i) {};
+    RbtNode.prototype["delete"] = function(i) {
+      switch (false) {
+        case i.key !== this.key:
+          break;
+        case !(i.key < this.key && left):
+          this.left["delete"](i);
+          break;
+        case !(i.key > this.key && right):
+          this.right["delete"](i);
+      }
+      return this.children = [this.left, this.right];
+    };
 
     RbtNode.prototype._cleanUpAfterInsert = function() {
       var og, _ref, _ref1, _ref2, _ref3;

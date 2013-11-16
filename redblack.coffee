@@ -21,6 +21,11 @@ class window.RbtNode
     @children = [@left, @right]
 
   delete: (i) ->
+    switch
+      when i.key is @key then
+      when i.key < @key and left then @left.delete i
+      when i.key > @key and right then @right.delete i
+    @children = [@left, @right]
 
   _cleanUpAfterInsert: ->
     if @red and @parent?.red and @_uncle?.red  # condition 4a in "Planar point location using persistent search trees"
