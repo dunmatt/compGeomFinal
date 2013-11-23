@@ -23,10 +23,46 @@ class window.RbtNode
 
   delete: (i) ->
     switch
-      when i.key is @key then
+      when i.key is @key then _removeParentOfOne(_swapToBottom())
       when i.key < @key and left then @left.delete(i)
       when i.key > @key and right then @right.delete(i)
     @_updateChildren()
+
+  # setDepth: (d) ->
+  #   @depth = d
+  #   d = @left?.setDepth(d+1)
+  #   d = @right?.setDepth(d+1)
+  #   d + 1
+  _swapToBottom: ->
+    other = _findPrevious()
+    if other
+      [@key, other.key] = [other.key, @key]
+      [@value, other.value] = [other.value, @value]
+      other
+    else
+      this
+
+  _removeParentOfOne: (victim) ->
+    child = victim.left or victim.right
+    if victim._isLeftChild()
+      victim.parent.left = child
+    else if victim._isRightChild()
+      victim.parent.right = child
+    if child
+      child.parent = victim.parent
+      if not victim.red
+        child._cleanUpAfterDelete()  # TODO: if this is the root something funky needs to happen
+    victim.parent = null
+    victim.right = null
+    victim.left = null
+
+  _findPrevious: -> @left?._findRightMost()
+
+  _findRightMost: ->
+    if @right?
+      @right._findRightMost()
+    else
+      this
 
   _updateChildren: ->
     @children = []
@@ -57,6 +93,8 @@ class window.RbtNode
             @_rotateRight(@parent)
           og.right.red = false  # NOTE: this is here because og.right may change in a rotate right
           @_rotateLeft(og)
+
+  _cleanUpAfterDelete: ->  #TODO: write me
 
   _rotateLeft: (root) ->
     if root?.right
@@ -106,5 +144,6 @@ class window.RbtNode
 
   _isLeftChild: -> this is @parent?.left
   _isRightChild: -> this is @parent?.right
+
 
   toString: -> @key + (if @red then " red " else " black ") + (if @parent then " P:" + @parent.key else "") +  (if @left then " L:" + @left.key else "") + (if @right then " R:" + @right.key else "") + " \[\n" + @children + " \]\n"

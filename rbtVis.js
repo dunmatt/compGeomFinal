@@ -40,8 +40,6 @@
 
   a.insert(j);
 
-  alert(a);
-
   height = 400;
 
   width = 700;
@@ -60,8 +58,10 @@
 
   svg.selectAll(".rbtLink").data(links).enter().append("path").attr("class", "rbtLink").attr("d", diagonal);
 
-  svg.selectAll(".node").data(nodes).enter().append("circle").attr("class", "node").attr("r", 10).attr("cx", function(d) {
-    return d.key * 50;
+  svg.selectAll(".node").data(nodes).enter().append("circle").attr("class", "node").attr("r", 10).attr("cy", function(d) {
+    return d.x;
+  }).attr("cx", function(d) {
+    return d.key;
   });
 
 }).call(this);

@@ -48,6 +48,7 @@
     RbtNode.prototype["delete"] = function(i) {
       switch (false) {
         case i.key !== this.key:
+          _removeParentOfOne(_swapToBottom());
           break;
         case !(i.key < this.key && left):
           this.left["delete"](i);
@@ -56,6 +57,50 @@
           this.right["delete"](i);
       }
       return this._updateChildren();
+    };
+
+    RbtNode.prototype._swapToBottom = function() {
+      var other, _ref, _ref1;
+      other = _findPrevious();
+      if (other) {
+        _ref = [other.key, this.key], this.key = _ref[0], other.key = _ref[1];
+        _ref1 = [other.value, this.value], this.value = _ref1[0], other.value = _ref1[1];
+        return other;
+      } else {
+        return this;
+      }
+    };
+
+    RbtNode.prototype._removeParentOfOne = function(victim) {
+      var child;
+      child = victim.left || victim.right;
+      if (victim._isLeftChild()) {
+        victim.parent.left = child;
+      } else if (victim._isRightChild()) {
+        victim.parent.right = child;
+      }
+      if (child) {
+        child.parent = victim.parent;
+        if (!victim.red) {
+          child._cleanUpAfterDelete();
+        }
+      }
+      victim.parent = null;
+      victim.right = null;
+      return victim.left = null;
+    };
+
+    RbtNode.prototype._findPrevious = function() {
+      var _ref;
+      return (_ref = this.left) != null ? _ref._findRightMost() : void 0;
+    };
+
+    RbtNode.prototype._findRightMost = function() {
+      if (this.right != null) {
+        return this.right._findRightMost();
+      } else {
+        return this;
+      }
     };
 
     RbtNode.prototype._updateChildren = function() {
@@ -100,6 +145,8 @@
         }
       }
     };
+
+    RbtNode.prototype._cleanUpAfterDelete = function() {};
 
     RbtNode.prototype._rotateLeft = function(root) {
       var B, x, y, _ref;
