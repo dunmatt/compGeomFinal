@@ -1,10 +1,12 @@
 points = []
 lines = []
+tree = null
 keyAlreadyDown = false
 editMode = true
 addEdgeMode = false
 deleteMode = false
 tentativeEdge = null
+lastTreeEnd = null
 radius = 5
 height = 400
 editModeClass = "editMode"
@@ -16,6 +18,7 @@ svg = d3.select("body").append("svg")
                        .attr("height", height)
                        .attr("class", editModeClass)
 slabLines = svg.append("svg:g").selectAll("line")
+treeGroup = svg.append("svg:g")
 edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
 
@@ -24,6 +27,11 @@ addEdge = (v, e) -> v.edges[v.edges.length] = e
 deleteVertex = (v) ->
   lines = (l for l in lines when l not in v.edges)
   points = (p for p in points when p isnt v)
+
+rightmostPointLeftOfMouse = ->
+  best = {x: 0, y: height/2}
+  points.forEach((p) -> best = p if p.x < d3.event.x and p.x > best.x)
+  best
 
 keyup = ->
   if editMode
@@ -34,16 +42,23 @@ keyup = ->
     svg.classed(deleteModeClass, false)
 
 keydown = ->
+  if d3.event.keyCode == 65 # a
+    alert(tree?.root)
   if editMode
     d3.event.preventDefault()
     return if keyAlreadyDown
     keyAlreadyDown = true
-    if d3.event.keyCode == 16
-      addEdgeMode = true
-      svg.classed(edgeModeClass, true)
-    else if d3.event.keyCode == 17
-      deleteMode = true
-      svg.classed(deleteModeClass, true)
+    switch d3.event.keyCode
+      when 16  # shift
+        addEdgeMode = true
+        svg.classed(edgeModeClass, true)
+      when 17  # ctrl
+        deleteMode = true
+        svg.classed(deleteModeClass, true)
+
+mousemove = ->
+  if not editMode
+    reset()
 
 dragstarted = (d) ->
   if editMode
@@ -109,6 +124,25 @@ reset = ->
   drawVertices()
 
 drawTree = ->
+  treeEnd = rightmostPointLeftOfMouse()
+  if lastTreeEnd isnt treeEnd
+    d3.selectAll(".rbtLink").remove()
+    drawSubTree(tree.root, treeEnd.x / (tree.height()-1))
+    lastTreeEnd = treeEnd
+
+drawSubTree = (root, levelSize, curDepth = 0) ->
+  rx = curDepth * levelSize
+  ry = root.key
+  cx = rx + levelSize
+  hx = rx + (levelSize / 2)
+  if root.left
+    cy = root.left.key
+    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{hx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    drawSubTree(root.left, levelSize, curDepth + 1)
+  if root.right
+    cy = root.right.key
+    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{hx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    drawSubTree(root.right, levelSize, curDepth + 1)
 
 drawSlabs = ->
   slabLines = slabLines.data(points)
@@ -150,9 +184,16 @@ drawVertices = ->
 toggleEditMode = ->
   editMode = not svg.classed(editModeClass)
   svg.classed(editModeClass, editMode)
+  tree = new RedBlackTree()
+  d3.selectAll(".rbtLink").remove()
+  points.sort((a, b) -> if a.x < b.x then -1 else 1)
+  points.forEach((p) -> tree.insert(p.y, p))
 
 svg.on("click", click)
-d3.select(window).on("keyup", keyup).on("keydown", keydown).on("mousedown", -> d3.event.preventDefault())
+d3.select(window).on("keyup", keyup)
+                 .on("keydown", keydown)
+                 .on("mousemove", mousemove)
+                 .on("mousedown", -> d3.event.preventDefault())
 d3.select("body").append("button")
                  .text("Toggle Query Mode")
                  .on("click", toggleEditMode)

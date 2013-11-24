@@ -1,3 +1,18 @@
+
+class window.RedBlackTree
+  constructor: ->
+    @root = null
+
+  insert: (k, v) ->
+    if @root
+      @root.insert(new RbtNode(k, v))
+      @root = @root.getRoot()
+    else
+      @root = new RbtNode(k, v)
+
+  height: -> @root.getHeight()
+
+
 class window.RbtNode
   constructor: (@key, @value) ->
     @parent = null
@@ -27,6 +42,13 @@ class window.RbtNode
       when i.key < @key and @left then @left.delete(i)
       when i.key > @key and @right then @right.delete(i)
     @_updateChildren()
+
+  getRoot: -> if @parent then @parent.getRoot() else this
+
+  getHeight: ->
+    l = @left?.getHeight() or 0
+    r = @right?.getHeight() or 0
+    1 + Math.max(l, r)
 
   # setDepth: (d) ->
   #   @depth = d
