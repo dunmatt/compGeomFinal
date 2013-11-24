@@ -25,47 +25,22 @@ a.insert(j)
 # alert(d)
 # alert(e)
  
-# 5 red  L:3.5 R:10 [
-#   3.5 black  P:5 L:3 R:4.25 [
-#     3 red  P:3.5 L:2 R:3.25 [
-#       2 red  P:3 L:1 [
-#         1 black  P:2 [] ]
-#       ,3.25 black  P:3 [] ]
-#     ,4.25 black  P:3.5 L:4 R:4.75 [
-#       4 red  P:4.25 []
-#       ,4.75 red  P:4.25 [] ]
-#    ]
-#  ,10 black  P:5 []
-# ]
-
-# 5 red  L:1 R:10 [
-#   1 red  P:5 R:3 [
-#     3 red  P:1 L:2 R:4 [
-#       2 black  P:3 []
-#       ,4 red  P:3 L:3.5 [
-#         3.5 black  P:4 []
-#       ]
-#     ]
-#   ]
-#   ,10 black  P:5 []
-# ]
-
 getEve = (n) ->
   if n.parent
     getEve(n.parent)
   else
     n
 
-getEve(a).delete({key: 1})
-getEve(a).delete({key: 2})
-getEve(a).delete({key: 3})
-getEve(a).delete({key: 3.5})
-getEve(a).delete({key: 4})
+# getEve(a).delete({key: 1})
+# getEve(a).delete({key: 2})
+# getEve(a).delete({key: 3})
+# getEve(a).delete({key: 3.5})
+# getEve(a).delete({key: 4})
 # getEve(a).delete(a)
 
 
 
-alert(getEve(a))
+# alert(getEve(a))
 
 height = 400
 width = 700

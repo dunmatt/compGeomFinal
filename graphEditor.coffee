@@ -26,56 +26,61 @@ deleteVertex = (v) ->
   points = (p for p in points when p isnt v)
 
 keyup = ->
-  keyAlreadyDown = false
-  addEdgeMode = false
-  deleteMode = false
-  svg.classed(edgeModeClass, false)
-  svg.classed(deleteModeClass, false)
+  if editMode
+    keyAlreadyDown = false
+    addEdgeMode = false
+    deleteMode = false
+    svg.classed(edgeModeClass, false)
+    svg.classed(deleteModeClass, false)
 
 keydown = ->
-  d3.event.preventDefault()
-  return if keyAlreadyDown
-  keyAlreadyDown = true
-  if d3.event.keyCode == 16
-    addEdgeMode = true
-    svg.classed(edgeModeClass, true)
-  else if d3.event.keyCode == 17
-    deleteMode = true
-    svg.classed(deleteModeClass, true)
+  if editMode
+    d3.event.preventDefault()
+    return if keyAlreadyDown
+    keyAlreadyDown = true
+    if d3.event.keyCode == 16
+      addEdgeMode = true
+      svg.classed(edgeModeClass, true)
+    else if d3.event.keyCode == 17
+      deleteMode = true
+      svg.classed(deleteModeClass, true)
 
 dragstarted = (d) ->
-  d3.event.sourceEvent.stopPropagation
-  s = d3.select(this).classed("dragging", true)
-  if addEdgeMode
-    tentativeEdge = {origin: s
-                     , line: svg.append("line")
-                                .attr("x1", s.attr("cx"))
-                                .attr("y1", s.attr("cy"))
-                                .attr("x2", s.attr("cx"))
-                                .attr("y2", s.attr("cy")) }
+  if editMode
+    d3.event.sourceEvent.stopPropagation
+    s = d3.select(this).classed("dragging", true)
+    if addEdgeMode
+      tentativeEdge = {origin: s
+                       , line: svg.append("line")
+                                  .attr("x1", s.attr("cx"))
+                                  .attr("y1", s.attr("cy"))
+                                  .attr("x2", s.attr("cx"))
+                                  .attr("y2", s.attr("cy")) }
 
 dragmove = (d) ->
-  if tentativeEdge?
-    tentativeEdge.line.attr("x2", d3.event.x).attr("y2", d3.event.y)
-  else
-    d3.select(this).datum().x = d3.event.x
-    d3.select(this).datum().y = d3.event.y
-    reset()
+  if editMode
+    if tentativeEdge?
+      tentativeEdge.line.attr("x2", d3.event.x).attr("y2", d3.event.y)
+    else
+      d3.select(this).datum().x = d3.event.x
+      d3.select(this).datum().y = d3.event.y
+      reset()
 
 dragended = (d) ->
-  d3.select(this).classed("dragging", false)
-  if tentativeEdge?
-    m = d3.mouse(this)
-    points.forEach((t) -> 
-                     x = t.x - m[0]
-                     y = t.y - m[1]
-                     if Math.sqrt(x*x + y*y) < radius
-                       lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
-                       addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
-                       addEdge(t, lines[lines.length-1]) )
-    tentativeEdge.line.remove()
-    tentativeEdge = null
-  reset()
+  if editMode
+    d3.select(this).classed("dragging", false)
+    if tentativeEdge?
+      m = d3.mouse(this)
+      points.forEach((t) -> 
+                       x = t.x - m[0]
+                       y = t.y - m[1]
+                       if Math.sqrt(x*x + y*y) < radius
+                         lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
+                         addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
+                         addEdge(t, lines[lines.length-1]) )
+      tentativeEdge.line.remove()
+      tentativeEdge = null
+    reset()
 
 drag = d3.behavior.drag()
   .on("drag", dragmove)
@@ -83,22 +88,27 @@ drag = d3.behavior.drag()
   .on("dragend", dragended)
 
 click = ->
-  return if d3.event.defaultPrevented
-  if deleteMode
-    m = d3.mouse(this)
-    points.forEach((t) ->
-                     x = t.x - m[0]
-                     y = t.y - m[1]
-                     if Math.sqrt(x*x + y*y) < radius
-                       deleteVertex(t))
-  else
-    points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1], edges: []}
-  reset()
+  if editMode
+    return if d3.event.defaultPrevented
+    if deleteMode
+      m = d3.mouse(this)
+      points.forEach((t) ->
+                       x = t.x - m[0]
+                       y = t.y - m[1]
+                       if Math.sqrt(x*x + y*y) < radius
+                         deleteVertex(t))
+    else
+      points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1], edges: []}
+    reset()
 
 reset = ->
+  if not editMode
+    drawTree()
   drawSlabs()
   drawEdges()
   drawVertices()
+
+drawTree = ->
 
 drawSlabs = ->
   slabLines = slabLines.data(points)

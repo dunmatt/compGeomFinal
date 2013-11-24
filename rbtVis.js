@@ -48,28 +48,6 @@
     }
   };
 
-  getEve(a)["delete"]({
-    key: 1
-  });
-
-  getEve(a)["delete"]({
-    key: 2
-  });
-
-  getEve(a)["delete"]({
-    key: 3
-  });
-
-  getEve(a)["delete"]({
-    key: 3.5
-  });
-
-  getEve(a)["delete"]({
-    key: 4
-  });
-
-  alert(getEve(a));
-
   height = 400;
 
   width = 700;
