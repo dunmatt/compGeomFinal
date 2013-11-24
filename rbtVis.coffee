@@ -50,6 +50,23 @@ a.insert(j)
 #   ,10 black  P:5 []
 # ]
 
+getEve = (n) ->
+  if n.parent
+    getEve(n.parent)
+  else
+    n
+
+getEve(a).delete({key: 1})
+getEve(a).delete({key: 2})
+getEve(a).delete({key: 3})
+getEve(a).delete({key: 3.5})
+getEve(a).delete({key: 4})
+# getEve(a).delete(a)
+
+
+
+alert(getEve(a))
+
 height = 400
 width = 700
 
@@ -60,8 +77,8 @@ svg = d3.select("body").append("svg")
 tree = d3.layout.tree().size([height, width])
 diagonal = d3.svg.diagonal().projection((d) -> [d.y, d.x])
 
-nodes = tree.nodes(g)
-# nodes = tree.nodes(a)
+# nodes = tree.nodes(g)
+nodes = tree.nodes(getEve(a))
 links = tree.links(nodes)
 
 svg.selectAll(".rbtLink").data(links).enter().append("path")

@@ -23,9 +23,9 @@ class window.RbtNode
 
   delete: (i) ->
     switch
-      when i.key is @key then _removeParentOfOne(_swapToBottom())
-      when i.key < @key and left then @left.delete(i)
-      when i.key > @key and right then @right.delete(i)
+      when i.key is @key then @_removeParentOfOne(@_swapToBottom())
+      when i.key < @key and @left then @left.delete(i)
+      when i.key > @key and @right then @right.delete(i)
     @_updateChildren()
 
   # setDepth: (d) ->
@@ -34,7 +34,7 @@ class window.RbtNode
   #   d = @right?.setDepth(d+1)
   #   d + 1
   _swapToBottom: ->
-    other = _findPrevious()
+    other = @_findPrevious()
     if other
       [@key, other.key] = [other.key, @key]
       [@value, other.value] = [other.value, @value]
@@ -44,14 +44,16 @@ class window.RbtNode
 
   _removeParentOfOne: (victim) ->
     child = victim.left or victim.right
+    leftShort = false
     if victim._isLeftChild()
       victim.parent.left = child
+      leftShort = true
     else if victim._isRightChild()
       victim.parent.right = child
     if child
       child.parent = victim.parent
-      if not victim.red
-        child._cleanUpAfterDelete()  # TODO: if this is the root something funky needs to happen
+    if not victim.red and @parent
+      @parent._cleanUpAfterDelete(leftShort)  # TODO: if this is the root something funky needs to happen
     victim.parent = null
     victim.right = null
     victim.left = null
@@ -94,7 +96,61 @@ class window.RbtNode
           og.right.red = false  # NOTE: this is here because og.right may change in a rotate right
           @_rotateLeft(og)
 
-  _cleanUpAfterDelete: ->  #TODO: write me
+  _cleanUpAfterDelete: (leftShort) ->  #TODO: write me
+    if leftShort
+      @_cleanUpAfterDeleteLeft()
+    else
+      @_cleanUpAfterDeleteRight()
+
+  _cleanUpAfterDeleteLeft: ->
+    if @left?.red
+      @left.red = false
+    else
+      # condition 5a in "Planar point location using persistent search trees"
+      if @right and @right.left and @right.right and not (@left?.red or @red or @right.red or @right.left.red or @right.right.red)
+        @right.red = true
+        @parent._cleanUpAfterDelete(@_isLeftChild())
+      if @right?.red and not @left?.red and not @red  #condition 5b
+        @red = true
+        @right.red = false
+        @_rotateLeft(this)
+      if @red and @right and @right.left and @right.right and not (@right.red or @right.left.red or @right.right.red)  #condition 5c
+        @red = false
+        @right.red = true
+      else if @right and not @right.red and @right.right and not (@right.right.red or @right.left)  #condition 5d
+        @right.red = @red
+        @red = false
+        @_rotateLeft(this)
+      else if @right and @right.right and @right.left?.red and not @right.right.red
+        @right.left.red = @red
+        @red = false
+        @_rotateRight(@right)
+        @_rotateLeft(this)
+
+  _cleanUpAfterDeleteRight: -> #TODO: write me
+    if @right?.red
+      @right.red = false
+    else
+      # condition 5a in "Planar point location using persistent search trees"
+      if @left and @left.right and @left.left and not (@right?.red or @red or @left.red or @left.right.red or @left.left.red)
+        @left.red = true
+        @parent._cleanUpAfterDelete(@_isLeftChild())
+      if @left?.red and not @right?.red and not @red  #condition 5b
+        @red = true
+        @left.red = false
+        @_rotateRight(this)
+      if @red and @left and @left.left and @left.right and not (@left.red or @left.left.red or @left.right.red)  #condition 5c
+        @red = false
+        @left.red = true
+      else if @left and not @left.red and @left.left and not (@left.left.red or @left.right)  #condition 5d
+        @left.red = @red
+        @red = false
+        @_rotateRight(this)
+      else if @left and @left.left and @left.right?.red and not @left.left.red
+        @left.right.red = @red
+        @red = false
+        @_rotateLeft(@left)
+        @_rotateRight(this)
 
   _rotateLeft: (root) ->
     if root?.right

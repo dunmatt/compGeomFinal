@@ -48,12 +48,12 @@
     RbtNode.prototype["delete"] = function(i) {
       switch (false) {
         case i.key !== this.key:
-          _removeParentOfOne(_swapToBottom());
+          this._removeParentOfOne(this._swapToBottom());
           break;
-        case !(i.key < this.key && left):
+        case !(i.key < this.key && this.left):
           this.left["delete"](i);
           break;
-        case !(i.key > this.key && right):
+        case !(i.key > this.key && this.right):
           this.right["delete"](i);
       }
       return this._updateChildren();
@@ -61,7 +61,7 @@
 
     RbtNode.prototype._swapToBottom = function() {
       var other, _ref, _ref1;
-      other = _findPrevious();
+      other = this._findPrevious();
       if (other) {
         _ref = [other.key, this.key], this.key = _ref[0], other.key = _ref[1];
         _ref1 = [other.value, this.value], this.value = _ref1[0], other.value = _ref1[1];
@@ -72,18 +72,20 @@
     };
 
     RbtNode.prototype._removeParentOfOne = function(victim) {
-      var child;
+      var child, leftShort;
       child = victim.left || victim.right;
+      leftShort = false;
       if (victim._isLeftChild()) {
         victim.parent.left = child;
+        leftShort = true;
       } else if (victim._isRightChild()) {
         victim.parent.right = child;
       }
       if (child) {
         child.parent = victim.parent;
-        if (!victim.red) {
-          child._cleanUpAfterDelete();
-        }
+      }
+      if (!victim.red && this.parent) {
+        this.parent._cleanUpAfterDelete(leftShort);
       }
       victim.parent = null;
       victim.right = null;
@@ -146,7 +148,73 @@
       }
     };
 
-    RbtNode.prototype._cleanUpAfterDelete = function() {};
+    RbtNode.prototype._cleanUpAfterDelete = function(leftShort) {
+      if (leftShort) {
+        return this._cleanUpAfterDeleteLeft();
+      } else {
+        return this._cleanUpAfterDeleteRight();
+      }
+    };
+
+    RbtNode.prototype._cleanUpAfterDeleteLeft = function() {
+      var _ref, _ref1, _ref2, _ref3, _ref4;
+      if ((_ref = this.left) != null ? _ref.red : void 0) {
+        return this.left.red = false;
+      } else {
+        if (this.right && this.right.left && this.right.right && !(((_ref1 = this.left) != null ? _ref1.red : void 0) || this.red || this.right.red || this.right.left.red || this.right.right.red)) {
+          this.right.red = true;
+          this.parent._cleanUpAfterDelete(this._isLeftChild());
+        }
+        if (((_ref2 = this.right) != null ? _ref2.red : void 0) && !((_ref3 = this.left) != null ? _ref3.red : void 0) && !this.red) {
+          this.red = true;
+          this.right.red = false;
+          this._rotateLeft(this);
+        }
+        if (this.red && this.right && this.right.left && this.right.right && !(this.right.red || this.right.left.red || this.right.right.red)) {
+          this.red = false;
+          return this.right.red = true;
+        } else if (this.right && !this.right.red && this.right.right && !(this.right.right.red || this.right.left)) {
+          this.right.red = this.red;
+          this.red = false;
+          return this._rotateLeft(this);
+        } else if (this.right && this.right.right && ((_ref4 = this.right.left) != null ? _ref4.red : void 0) && !this.right.right.red) {
+          this.right.left.red = this.red;
+          this.red = false;
+          this._rotateRight(this.right);
+          return this._rotateLeft(this);
+        }
+      }
+    };
+
+    RbtNode.prototype._cleanUpAfterDeleteRight = function() {
+      var _ref, _ref1, _ref2, _ref3, _ref4;
+      if ((_ref = this.right) != null ? _ref.red : void 0) {
+        return this.right.red = false;
+      } else {
+        if (this.left && this.left.right && this.left.left && !(((_ref1 = this.right) != null ? _ref1.red : void 0) || this.red || this.left.red || this.left.right.red || this.left.left.red)) {
+          this.left.red = true;
+          this.parent._cleanUpAfterDelete(this._isLeftChild());
+        }
+        if (((_ref2 = this.left) != null ? _ref2.red : void 0) && !((_ref3 = this.right) != null ? _ref3.red : void 0) && !this.red) {
+          this.red = true;
+          this.left.red = false;
+          this._rotateRight(this);
+        }
+        if (this.red && this.left && this.left.left && this.left.right && !(this.left.red || this.left.left.red || this.left.right.red)) {
+          this.red = false;
+          return this.left.red = true;
+        } else if (this.left && !this.left.red && this.left.left && !(this.left.left.red || this.left.right)) {
+          this.left.red = this.red;
+          this.red = false;
+          return this._rotateRight(this);
+        } else if (this.left && this.left.left && ((_ref4 = this.left.right) != null ? _ref4.red : void 0) && !this.left.left.red) {
+          this.left.right.red = this.red;
+          this.red = false;
+          this._rotateLeft(this.left);
+          return this._rotateRight(this);
+        }
+      }
+    };
 
     RbtNode.prototype._rotateLeft = function(root) {
       var B, x, y, _ref;
