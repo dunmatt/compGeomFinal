@@ -223,22 +223,23 @@
   };
 
   drawSubTree = function(root, levelSize, curDepth) {
-    var cx, cy, hx, rx, ry;
+    var cx, cy, gx, hx, rx, ry;
     if (curDepth == null) {
       curDepth = 0;
     }
     rx = curDepth * levelSize;
     ry = root.key;
     cx = rx + levelSize;
-    hx = rx + (levelSize / 2);
+    gx = rx + (levelSize / 4);
+    hx = rx + (levelSize * 3 / 4);
     if (root.left) {
       cy = root.left.key;
-      treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + hx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
+      treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + gx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
       drawSubTree(root.left, levelSize, curDepth + 1);
     }
     if (root.right) {
       cy = root.right.key;
-      treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + hx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
+      treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + gx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
       return drawSubTree(root.right, levelSize, curDepth + 1);
     }
   };
@@ -314,9 +315,9 @@
     });
   };
 
-  svg.on("click", click);
+  svg.on("click", click).on("mousemove", mousemove);
 
-  d3.select(window).on("keyup", keyup).on("keydown", keydown).on("mousemove", mousemove).on("mousedown", function() {
+  d3.select(window).on("keyup", keyup).on("keydown", keydown).on("mousedown", function() {
     return d3.event.preventDefault();
   });
 

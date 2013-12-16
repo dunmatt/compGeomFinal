@@ -134,14 +134,15 @@ drawSubTree = (root, levelSize, curDepth = 0) ->
   rx = curDepth * levelSize
   ry = root.key
   cx = rx + levelSize
-  hx = rx + (levelSize / 2)
+  gx = rx + (levelSize / 4)
+  hx = rx + (levelSize * 3 / 4)
   if root.left
     cy = root.left.key
-    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{hx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawSubTree(root.left, levelSize, curDepth + 1)
   if root.right
     cy = root.right.key
-    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{hx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawSubTree(root.right, levelSize, curDepth + 1)
 
 drawSlabs = ->
@@ -189,10 +190,9 @@ toggleEditMode = ->
   points.sort((a, b) -> if a.x < b.x then -1 else 1)
   points.forEach((p) -> tree.insert(p.y, p))
 
-svg.on("click", click)
+svg.on("click", click).on("mousemove", mousemove)
 d3.select(window).on("keyup", keyup)
                  .on("keydown", keydown)
-                 .on("mousemove", mousemove)
                  .on("mousedown", -> d3.event.preventDefault())
 d3.select("body").append("button")
                  .text("Toggle Query Mode")
