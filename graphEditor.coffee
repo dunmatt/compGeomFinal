@@ -87,12 +87,12 @@ dragended = (d) ->
     if tentativeEdge?
       m = d3.mouse(this)
       points.forEach((t) -> 
-                       x = t.x - m[0]
-                       y = t.y - m[1]
-                       if Math.sqrt(x*x + y*y) < radius
-                         lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
-                         addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
-                         addEdge(t, lines[lines.length-1]) )
+                        x = t.x - m[0]
+                        y = t.y - m[1]
+                        if Math.sqrt(x*x + y*y) < radius
+                          lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
+                          addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
+                          addEdge(t, lines[lines.length-1]) )
       tentativeEdge.line.remove()
       tentativeEdge = null
     reset()
@@ -187,8 +187,11 @@ toggleEditMode = ->
   svg.classed(editModeClass, editMode)
   tree = new RedBlackTree()
   d3.selectAll(".rbtLink").remove()
-  points.sort((a, b) -> if a.x < b.x then -1 else 1)
-  points.forEach((p) -> tree.insert(p.y, p))
+  if not editMode
+    l = lines.map((l) -> if l[0].x < l[1].x then l else [l[1], l[0]])
+    events = ([line[0].x, true, line] for line in l).concat(([line[1].x, false, line] for line in l))
+    events.sort((a, b) -> if a[0] < b[0] then -1 else 1)
+    events.forEach((e) -> if e[1] then tree.insert(e[0], e[2]) else tree.delete(e[0], e[2]))
 
 svg.on("click", click).on("mousemove", mousemove)
 d3.select(window).on("keyup", keyup)

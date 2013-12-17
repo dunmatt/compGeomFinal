@@ -1,17 +1,31 @@
 
 class window.RedBlackTree
   constructor: ->
-    @root = null
+    @lastModification = -99999999
+    @roots = []
 
-  insert: (k, v) ->
-    if @root
-      @root.insert(new RbtNode(k, v))
-      @root = @root.getRoot()
-    else
-      @root = new RbtNode(k, v)
+  insert: (t, i) ->
+    if t > @lastModification
+      @lastModification = t
+      if @roots.length
+        oldRoot = @_getRoot(t)
+        @_trackNewRoot(oldRoot, oldRoot.insert(new RbtNode(i.my, i)))
+      else
+        @_trackNewRoot(false, new RbtNode(i.my, i))
 
-  height: -> @root.getHeight()
+  delete: (t, i) ->
+    if t > @lastModification
+      @lastModification = t
+      @_trackNewRoot(@_getRoot(t).delete(i))
 
+  height: (t) -> @_getRoot(t).getHeight()
+
+  _getRoot: (t) ->
+    @roots.filter((a) -> a.time < t).reduce((a, b) -> if a.time > b.time then a else b).root
+
+  _trackNewRoot: (o, n) ->
+    if o isnt n
+      @roots.concat({time: t, root: newRoot})
 
 class window.RbtNode
   constructor: (@key, @value) ->
@@ -21,27 +35,38 @@ class window.RbtNode
     @left  = null
     @right = null
 
-  access: (k) ->
-    switch
-      when k == @key then this
-      when k < @key then @left?.access(k)
-      when k > @key then @right?.access(k)
+    @newChild = null
+    @newChildLeft = false
+    @newChildTime = -1
 
-  insert: (i) ->
+    # TODO: replace this with a query method
+  # access: (t, q) ->
+  #   switch
+  #     when q == @key then this
+  #     when q < @key then @left?.access(t, q)
+  #     when q > @key then @right?.access(t, q)
+
+  insert: (t, i) ->
     switch
-      when i.key < @key and @left then @left.insert(i)
-      when i.key < @key then @left = i; i.parent = this
-      when i.key > @key and @right then @right.insert(i)
-      when i.key > @key then @right = i; i.parent = this
+      when i.key < @key and t > @newChildTime and @newChildLeft     then @newChild.insert(t, i)
+      when i.key < @key and @left                                   then @left.insert(t, i)
+      when i.key < @key                                             then @left = i; i.parent = this
+      when i.key > @key and t > @newChildTime and not @newChildLeft then @newChild.insert(t, i)
+      when i.key > @key and @right                                  then @right.insert(t, i)
+      when i.key > @key                                             then @right = i; i.parent = this
     i._cleanUpAfterInsert()
     @_updateChildren()
+    # TODO: return the root
 
-  delete: (i) ->
+  delete: (t, i) ->
     switch
       when i.key is @key then @_removeParentOfOne(@_swapToBottom())
-      when i.key < @key and @left then @left.delete(i)
-      when i.key > @key and @right then @right.delete(i)
+      when i.key < @key and t > @newChildTime and @newChildLeft     then @newChild.delete(t, i)
+      when i.key < @key and @left                                   then @left.delete(i)
+      when i.key > @key and t > @newChildTime and not @newChildLeft then @newChild.delete(t, i)
+      when i.key > @key and @right                                  then @right.delete(i)
     @_updateChildren()
+    # TODO: return the root
 
   getRoot: -> if @parent then @parent.getRoot() else this
 

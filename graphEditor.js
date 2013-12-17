@@ -299,20 +299,51 @@
   };
 
   toggleEditMode = function() {
+    var events, l, line;
     editMode = !svg.classed(editModeClass);
     svg.classed(editModeClass, editMode);
     tree = new RedBlackTree();
     d3.selectAll(".rbtLink").remove();
-    points.sort(function(a, b) {
-      if (a.x < b.x) {
-        return -1;
-      } else {
-        return 1;
-      }
-    });
-    return points.forEach(function(p) {
-      return tree.insert(p.y, p);
-    });
+    if (!editMode) {
+      l = lines.map(function(l) {
+        if (l[0].x < l[1].x) {
+          return l;
+        } else {
+          return [l[1], l[0]];
+        }
+      });
+      events = ((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = l.length; _i < _len; _i++) {
+          line = l[_i];
+          _results.push([line[0].x, true, line]);
+        }
+        return _results;
+      })()).concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = l.length; _i < _len; _i++) {
+          line = l[_i];
+          _results.push([line[1].x, false, line]);
+        }
+        return _results;
+      })());
+      events.sort(function(a, b) {
+        if (a[0] < b[0]) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      return events.forEach(function(e) {
+        if (e[1]) {
+          return tree.insert(e[0], e[2]);
+        } else {
+          return tree["delete"](e[0], e[2]);
+        }
+      });
+    }
   };
 
   svg.on("click", click).on("mousemove", mousemove);

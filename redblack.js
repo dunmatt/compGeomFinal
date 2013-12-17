@@ -4,20 +4,53 @@
   window.RedBlackTree = (function() {
 
     function RedBlackTree() {
-      this.root = null;
+      this.lastModification = -99999999;
+      this.roots = [];
     }
 
-    RedBlackTree.prototype.insert = function(k, v) {
-      if (this.root) {
-        this.root.insert(new RbtNode(k, v));
-        return this.root = this.root.getRoot();
-      } else {
-        return this.root = new RbtNode(k, v);
+    RedBlackTree.prototype.insert = function(t, i) {
+      var oldRoot;
+      if (t > this.lastModification) {
+        this.lastModification = t;
+        if (this.roots.length) {
+          oldRoot = this._getRoot(t);
+          return this._trackNewRoot(oldRoot, oldRoot.insert(new RbtNode(i.my, i)));
+        } else {
+          return this._trackNewRoot(false, new RbtNode(i.my, i));
+        }
       }
     };
 
-    RedBlackTree.prototype.height = function() {
-      return this.root.getHeight();
+    RedBlackTree.prototype["delete"] = function(t, i) {
+      if (t > this.lastModification) {
+        this.lastModification = t;
+        return this._trackNewRoot(this._getRoot(t)["delete"](i));
+      }
+    };
+
+    RedBlackTree.prototype.height = function(t) {
+      return this._getRoot(t).getHeight();
+    };
+
+    RedBlackTree.prototype._getRoot = function(t) {
+      return this.roots.filter(function(a) {
+        return a.time < t;
+      }).reduce(function(a, b) {
+        if (a.time > b.time) {
+          return a;
+        } else {
+          return b;
+        }
+      }).root;
+    };
+
+    RedBlackTree.prototype._trackNewRoot = function(o, n) {
+      if (o !== n) {
+        return this.roots.concat({
+          time: t,
+          root: newRoot
+        });
+      }
     };
 
     return RedBlackTree;
@@ -34,31 +67,28 @@
       this.children = [];
       this.left = null;
       this.right = null;
+      this.newChild = null;
+      this.newChildLeft = false;
+      this.newChildTime = -1;
     }
 
-    RbtNode.prototype.access = function(k) {
-      var _ref, _ref1;
+    RbtNode.prototype.insert = function(t, i) {
       switch (false) {
-        case k !== this.key:
-          return this;
-        case !(k < this.key):
-          return (_ref = this.left) != null ? _ref.access(k) : void 0;
-        case !(k > this.key):
-          return (_ref1 = this.right) != null ? _ref1.access(k) : void 0;
-      }
-    };
-
-    RbtNode.prototype.insert = function(i) {
-      switch (false) {
+        case !(i.key < this.key && t > this.newChildTime && this.newChildLeft):
+          this.newChild.insert(t, i);
+          break;
         case !(i.key < this.key && this.left):
-          this.left.insert(i);
+          this.left.insert(t, i);
           break;
         case !(i.key < this.key):
           this.left = i;
           i.parent = this;
           break;
+        case !(i.key > this.key && t > this.newChildTime && !this.newChildLeft):
+          this.newChild.insert(t, i);
+          break;
         case !(i.key > this.key && this.right):
-          this.right.insert(i);
+          this.right.insert(t, i);
           break;
         case !(i.key > this.key):
           this.right = i;
@@ -68,13 +98,19 @@
       return this._updateChildren();
     };
 
-    RbtNode.prototype["delete"] = function(i) {
+    RbtNode.prototype["delete"] = function(t, i) {
       switch (false) {
         case i.key !== this.key:
           this._removeParentOfOne(this._swapToBottom());
           break;
+        case !(i.key < this.key && t > this.newChildTime && this.newChildLeft):
+          this.newChild["delete"](t, i);
+          break;
         case !(i.key < this.key && this.left):
           this.left["delete"](i);
+          break;
+        case !(i.key > this.key && t > this.newChildTime && !this.newChildLeft):
+          this.newChild["delete"](t, i);
           break;
         case !(i.key > this.key && this.right):
           this.right["delete"](i);
