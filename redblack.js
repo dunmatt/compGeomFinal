@@ -29,7 +29,7 @@
     };
 
     RedBlackTree.prototype.height = function(t) {
-      return this._getRoot(t).getHeight();
+      return this._getRoot(t).getHeight(t);
     };
 
     RedBlackTree.prototype._getRoot = function(t) {
@@ -126,10 +126,10 @@
       }
     };
 
-    RbtNode.prototype.getHeight = function() {
+    RbtNode.prototype.getHeight = function(t) {
       var l, r, _ref, _ref1;
-      l = ((_ref = this.left) != null ? _ref.getHeight() : void 0) || 0;
-      r = ((_ref1 = this.right) != null ? _ref1.getHeight() : void 0) || 0;
+      l = t > this.newChildTime && this.newChild && this.newChildLeft && this.newChild.getHeight(t) || ((_ref = this.left) != null ? _ref.getHeight(t) : void 0) || 0;
+      r = t > this.newChildTime && this.newChild && !this.newChildLeft && this.newChild.getHeight(t) || ((_ref1 = this.right) != null ? _ref1.getHeight(t) : void 0) || 0;
       return 1 + Math.max(l, r);
     };
 

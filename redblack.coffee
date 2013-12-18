@@ -18,7 +18,7 @@ class window.RedBlackTree
       @lastModification = t
       @_trackNewRoot(@_getRoot(t).delete(i))
 
-  height: (t) -> @_getRoot(t).getHeight()
+  height: (t) -> @_getRoot(t).getHeight(t)
 
   _getRoot: (t) ->
     @roots.filter((a) -> a.time < t).reduce((a, b) -> if a.time > b.time then a else b).root
@@ -70,9 +70,9 @@ class window.RbtNode
 
   getRoot: -> if @parent then @parent.getRoot() else this
 
-  getHeight: ->
-    l = @left?.getHeight() or 0
-    r = @right?.getHeight() or 0
+  getHeight: (t) ->
+    l = t > @newChildTime and @newChild and @newChildLeft and @newChild.getHeight(t) or @left?.getHeight(t) or 0
+    r = t > @newChildTime and @newChild and not @newChildLeft and @newChild.getHeight(t) or @right?.getHeight(t) or 0
     1 + Math.max(l, r)
 
   # setDepth: (d) ->
