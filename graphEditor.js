@@ -96,8 +96,13 @@
   };
 
   keydown = function() {
+    var r, _i, _len, _ref;
     if (d3.event.keyCode === 65) {
-      alert(tree != null ? tree.root : void 0);
+      _ref = tree.roots;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        r = _ref[_i];
+        alert("" + r.time + ": " + r.root);
+      }
     }
     if (editMode) {
       d3.event.preventDefault();
@@ -213,11 +218,14 @@
   };
 
   drawTree = function() {
-    var treeEnd;
+    var root, treeEnd;
     treeEnd = rightmostPointLeftOfMouse();
     if (lastTreeEnd !== treeEnd) {
       d3.selectAll(".rbtLink").remove();
-      drawSubTree(tree.root, treeEnd.x / (tree.height() - 1));
+      root = tree.getRoot(d3.event.x);
+      if (root != null ? root.height() : void 0) {
+        drawSubTree(root, treeEnd.x / (root.height() - 1));
+      }
       return lastTreeEnd = treeEnd;
     }
   };
@@ -228,17 +236,17 @@
       curDepth = 0;
     }
     rx = curDepth * levelSize;
-    ry = root.key;
+    ry = root.line.midPoint.y;
     cx = rx + levelSize;
     gx = rx + (levelSize / 4);
     hx = rx + (levelSize * 3 / 4);
     if (root.left) {
-      cy = root.left.key;
+      cy = root.left.line.midPoint.y;
       treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + gx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
       drawSubTree(root.left, levelSize, curDepth + 1);
     }
     if (root.right) {
-      cy = root.right.key;
+      cy = root.right.line.midPoint.y;
       treeGroup.append("path").attr("d", "M" + rx + " " + ry + "C" + hx + " " + ry + " " + gx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
       return drawSubTree(root.right, levelSize, curDepth + 1);
     }
@@ -299,33 +307,29 @@
   };
 
   toggleEditMode = function() {
-    var events, l, line;
+    var events, seg, segments;
     editMode = !svg.classed(editModeClass);
     svg.classed(editModeClass, editMode);
     tree = new RedBlackTree();
     d3.selectAll(".rbtLink").remove();
     if (!editMode) {
-      l = lines.map(function(l) {
-        if (l[0].x < l[1].x) {
-          return l;
-        } else {
-          return [l[1], l[0]];
-        }
+      segments = lines.map(function(l) {
+        return new LineSegment(l.a, l.b);
       });
       events = ((function() {
         var _i, _len, _results;
         _results = [];
-        for (_i = 0, _len = l.length; _i < _len; _i++) {
-          line = l[_i];
-          _results.push([line[0].x, true, line]);
+        for (_i = 0, _len = segments.length; _i < _len; _i++) {
+          seg = segments[_i];
+          _results.push([seg.a.x, true, seg]);
         }
         return _results;
       })()).concat((function() {
         var _i, _len, _results;
         _results = [];
-        for (_i = 0, _len = l.length; _i < _len; _i++) {
-          line = l[_i];
-          _results.push([line[1].x, false, line]);
+        for (_i = 0, _len = segments.length; _i < _len; _i++) {
+          seg = segments[_i];
+          _results.push([seg.b.x, false, seg]);
         }
         return _results;
       })());

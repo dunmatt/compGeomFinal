@@ -43,7 +43,9 @@ keyup = ->
 
 keydown = ->
   if d3.event.keyCode == 65 # a
-    alert(tree?.root)
+    for r in tree.roots
+      alert("#{r.time}: #{r.root}")
+    # alert(tree.roots[tree.roots.length-1].root)
   if editMode
     d3.event.preventDefault()
     return if keyAlreadyDown
@@ -127,21 +129,23 @@ drawTree = ->
   treeEnd = rightmostPointLeftOfMouse()
   if lastTreeEnd isnt treeEnd
     d3.selectAll(".rbtLink").remove()
-    drawSubTree(tree.root, treeEnd.x / (tree.height()-1))
+    root = tree.getRoot(d3.event.x)
+    if root?.height()
+      drawSubTree(root, treeEnd.x / (root.height()-1))
     lastTreeEnd = treeEnd
 
 drawSubTree = (root, levelSize, curDepth = 0) ->
   rx = curDepth * levelSize
-  ry = root.key
+  ry = root.line.midPoint.y
   cx = rx + levelSize
   gx = rx + (levelSize / 4)
   hx = rx + (levelSize * 3 / 4)
   if root.left
-    cy = root.left.key
+    cy = root.left.line.midPoint.y
     treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawSubTree(root.left, levelSize, curDepth + 1)
   if root.right
-    cy = root.right.key
+    cy = root.right.line.midPoint.y
     treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawSubTree(root.right, levelSize, curDepth + 1)
 
@@ -188,10 +192,14 @@ toggleEditMode = ->
   tree = new RedBlackTree()
   d3.selectAll(".rbtLink").remove()
   if not editMode
-    l = lines.map((l) -> if l[0].x < l[1].x then l else [l[1], l[0]])
-    events = ([line[0].x, true, line] for line in l).concat(([line[1].x, false, line] for line in l))
+    segments = lines.map((l) -> new LineSegment(l.a, l.b))
+    # make a list of all the creations and all the deletions, with timestamps
+    events = ([seg.a.x, true, seg] for seg in segments).concat(([seg.b.x, false, seg] for seg in segments))
+    # sort chonologically
     events.sort((a, b) -> if a[0] < b[0] then -1 else 1)
+    # populate (and depopulate) the rbt
     events.forEach((e) -> if e[1] then tree.insert(e[0], e[2]) else tree.delete(e[0], e[2]))
+    # alert(tree.roots.length)
 
 svg.on("click", click).on("mousemove", mousemove)
 d3.select(window).on("keyup", keyup)

@@ -9,51 +9,150 @@
     }
 
     RedBlackTree.prototype.insert = function(t, i) {
-      var oldRoot;
-      if (t > this.lastModification) {
-        this.lastModification = t;
-        if (this.roots.length) {
-          oldRoot = this._getRoot(t);
-          return this._trackNewRoot(oldRoot, oldRoot.insert(new RbtNode(i.my, i)));
+      var root;
+      if (t >= this.lastModification) {
+        root = this.getRoot(t);
+        if (root) {
+          return this._trackNewRoot(t, root.insert(new LineSegmentRbtNode(i), true));
         } else {
-          return this._trackNewRoot(false, new RbtNode(i.my, i));
+          return this._trackNewRoot(t, new LineSegmentRbtNode(i));
         }
       }
     };
 
     RedBlackTree.prototype["delete"] = function(t, i) {
       if (t > this.lastModification) {
-        this.lastModification = t;
-        return this._trackNewRoot(this._getRoot(t)["delete"](i));
+        return this._trackNewRoot(t, this.getRoot(t)["delete"](i));
       }
     };
 
     RedBlackTree.prototype.height = function(t) {
-      return this._getRoot(t).getHeight(t);
+      return this.getRoot(t).height();
     };
 
-    RedBlackTree.prototype._getRoot = function(t) {
-      return this.roots.filter(function(a) {
-        return a.time < t;
-      }).reduce(function(a, b) {
-        if (a.time > b.time) {
-          return a;
-        } else {
-          return b;
-        }
-      }).root;
-    };
-
-    RedBlackTree.prototype._trackNewRoot = function(o, n) {
-      if (o !== n) {
-        return this.roots.concat({
-          time: t,
-          root: newRoot
-        });
+    RedBlackTree.prototype.getRoot = function(t) {
+      var prev;
+      prev = this.roots.filter(function(a) {
+        return a.time <= t;
+      });
+      if (prev.length) {
+        return prev.reduce(function(a, b) {
+          if (a.time > b.time) {
+            return a;
+          } else {
+            return b;
+          }
+        }).root;
+      } else {
+        return null;
       }
     };
 
+    RedBlackTree.prototype._trackNewRoot = function(t, n) {
+      this.lastModification = t;
+      return this.roots[this.roots.length] = {
+        time: t,
+        root: n
+      };
+    };
+
     return RedBlackTree;
+
+  })();
+
+  window.LineSegmentRbtNode = (function() {
+
+    function LineSegmentRbtNode(line, left, right, red) {
+      this.line = line;
+      this.left = left;
+      this.right = right;
+      this.red = red != null ? red : true;
+    }
+
+    LineSegmentRbtNode.prototype.height = function() {
+      var _ref, _ref1;
+      return 1 + Math.max(((_ref = this.left) != null ? _ref.height() : void 0) || 0, ((_ref1 = this.right) != null ? _ref1.height() : void 0) || 0);
+    };
+
+    LineSegmentRbtNode.prototype.insert = function(newNode, isRoot) {
+      var comp;
+      if (isRoot == null) {
+        isRoot = false;
+      }
+      comp = this.line.comparePoint(newNode.line.midPoint);
+      switch (false) {
+        case !(comp < 0 && this.left):
+          return new LineSegmentRbtNode(this.line, this.left.insert(newNode), this.right, this.red)._cleanUpAfterInsert(isRoot);
+        case !(comp < 0):
+          return new LineSegmentRbtNode(this.line, newNode, this.right, this.red)._cleanUpAfterInsert(isRoot);
+        case !(comp > 0 && this.right):
+          return new LineSegmentRbtNode(this.line, this.left, this.right.insert(newNode), this.red)._cleanUpAfterInsert(isRoot);
+        case !(comp > 0):
+          return new LineSegmentRbtNode(this.line, this.left, newNode, this.red)._cleanUpAfterInsert(isRoot);
+      }
+    };
+
+    LineSegmentRbtNode.prototype["delete"] = function(item) {
+      var comp;
+      comp = this.line.comparePoint(item.midPoint);
+      switch (false) {
+        case !(comp < 0 && this.left):
+          return new LineSegmentRbtNode(this.line, this.left["delete"](item), this.right, this.red);
+        case !(comp > 0 && this.right):
+          return new LineSegmentRbtNode(this.line, this.left, this.right["delete"](item), this.red);
+        case !(comp === 0 && this.left):
+          return new LineSegmentRbtNode(this.left._getRightmostLine(), this.left._deleteRightmostDecendant(), this.right, this.red);
+        case comp !== 0:
+          return this.right;
+      }
+    };
+
+    LineSegmentRbtNode.prototype._getRightmostLine = function() {
+      if (this.right) {
+        return this.right._getRightmostLine();
+      } else {
+        return this.line;
+      }
+    };
+
+    LineSegmentRbtNode.prototype._deleteRightmostDecendant = function() {
+      if (this.right) {
+        return new LineSegmentRbtNode(this.line, this.left, this.right._deleteRightmostDecendant(), this.red);
+      } else {
+        return this.left;
+      }
+    };
+
+    LineSegmentRbtNode.prototype._cleanUpAfterInsert = function(isRoot) {
+      var _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+      if (!this.red && ((_ref = this.left) != null ? _ref.red : void 0) && ((_ref1 = this.right) != null ? _ref1.red : void 0) && (((_ref2 = this.left) != null ? (_ref3 = _ref2.left) != null ? _ref3.red : void 0 : void 0) || ((_ref4 = this.left) != null ? (_ref5 = _ref4.right) != null ? _ref5.red : void 0 : void 0) || ((_ref6 = this.right) != null ? (_ref7 = _ref6.left) != null ? _ref7.red : void 0 : void 0) || ((_ref8 = this.right) != null ? (_ref9 = _ref8.right) != null ? _ref9.red : void 0 : void 0))) {
+        this.red = true;
+        this.left.red = false;
+        this.right.red = false;
+      }
+      if (isRoot && this.red && (((_ref10 = this.left) != null ? _ref10.red : void 0) && !this.right || ((_ref11 = this.right) != null ? _ref11.red : void 0) && !this.left)) {
+        this.red = false;
+        return this;
+      } else if (!this.red && this.right && !this.right.red && ((_ref12 = this.left) != null ? _ref12.red : void 0) && ((_ref13 = this.left) != null ? (_ref14 = _ref13.left) != null ? _ref14.red : void 0 : void 0)) {
+        return new LineSegmentRbtNode(this.left.line, this.left.left, new LineSegmentRbtNode(this.line, this.left.right, this.right), false);
+      } else if (!this.red && this.left && !this.left.red && ((_ref15 = this.right) != null ? _ref15.red : void 0) && ((_ref16 = this.right) != null ? (_ref17 = _ref16.right) != null ? _ref17.red : void 0 : void 0)) {
+        return new LineSegmentRbtNode(this.right.line, new LineSegmentRbtNode(this.line, this.left, this.right.left), this.right.right, false);
+      } else if (!this.red && this.right && !this.right.red && ((_ref18 = this.left) != null ? _ref18.red : void 0) && ((_ref19 = this.left) != null ? (_ref20 = _ref19.right) != null ? _ref20.red : void 0 : void 0)) {
+        return new LineSegmentRbtNode(this.left.right.line, new LineSegmentRbtNode(this.left.line, this.left.left, this.left.right.left), new LineSegmentRbtNode(this.line, this.left.right.right, this.right), false);
+      } else if (!this.red && this.left && !this.left.red && ((_ref21 = this.right) != null ? _ref21.red : void 0) && ((_ref22 = this.right) != null ? (_ref23 = _ref22.left) != null ? _ref23.red : void 0 : void 0)) {
+        return new LineSegmentRbtNode(this.right.left.line, new LineSegmentRbtNode(this.right.line, this.right.left.right, this.right.right), new LineSegmentRbtNode(this.line, this.left, this.right.left.left), false);
+      } else {
+        return this;
+      }
+    };
+
+    LineSegmentRbtNode.prototype._cleanUpAfterDelete = function() {};
+
+    LineSegmentRbtNode.prototype.toString = function() {
+      return this.line + (this.red ? " red " : " black ") + (this.left ? " L:" + this.left : "") + (this.right ? " R:" + this.right : "");
+    };
+
+    return LineSegmentRbtNode;
 
   })();
 
@@ -62,7 +161,6 @@
     function RbtNode(key, value) {
       this.key = key;
       this.value = value;
-      this.parent = null;
       this.red = true;
       this.children = [];
       this.left = null;
@@ -82,7 +180,6 @@
           break;
         case !(i.key < this.key):
           this.left = i;
-          i.parent = this;
           break;
         case !(i.key > this.key && t > this.newChildTime && !this.newChildLeft):
           this.newChild.insert(t, i);
@@ -92,7 +189,6 @@
           break;
         case !(i.key > this.key):
           this.right = i;
-          i.parent = this;
       }
       i._cleanUpAfterInsert();
       return this._updateChildren();
@@ -116,14 +212,6 @@
           this.right["delete"](i);
       }
       return this._updateChildren();
-    };
-
-    RbtNode.prototype.getRoot = function() {
-      if (this.parent) {
-        return this.parent.getRoot();
-      } else {
-        return this;
-      }
     };
 
     RbtNode.prototype.getHeight = function(t) {

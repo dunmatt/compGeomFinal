@@ -5,31 +5,91 @@ class window.RedBlackTree
     @roots = []
 
   insert: (t, i) ->
-    if t > @lastModification
-      @lastModification = t
-      if @roots.length
-        oldRoot = @_getRoot(t)
-        @_trackNewRoot(oldRoot, oldRoot.insert(new RbtNode(i.my, i)))
+    if t >= @lastModification
+      root = @getRoot(t)
+      if root
+        @_trackNewRoot(t, root.insert(new LineSegmentRbtNode(i), true))
       else
-        @_trackNewRoot(false, new RbtNode(i.my, i))
+        @_trackNewRoot(t, new LineSegmentRbtNode(i))
 
   delete: (t, i) ->
     if t > @lastModification
-      @lastModification = t
-      @_trackNewRoot(@_getRoot(t).delete(i))
+      @_trackNewRoot(t, @getRoot(t).delete(i))
 
-  height: (t) -> @_getRoot(t).getHeight(t)
+  height: (t) -> @getRoot(t).height()
 
-  _getRoot: (t) ->
-    @roots.filter((a) -> a.time < t).reduce((a, b) -> if a.time > b.time then a else b).root
+  getRoot: (t) ->
+    prev = @roots.filter((a) -> a.time <= t)
+    if prev.length then prev.reduce((a, b) -> if a.time > b.time then a else b).root else null
 
-  _trackNewRoot: (o, n) ->
-    if o isnt n
-      @roots.concat({time: t, root: newRoot})
+  _trackNewRoot: (t, n) ->
+    @lastModification = t
+    @roots[@roots.length] = {time: t, root: n}
+
+class window.LineSegmentRbtNode
+  constructor: (@line, @left, @right, @red = true) ->
+    # @short = false
+
+  height: -> 1 + Math.max(@left?.height() or 0, @right?.height() or 0)
+
+  insert: (newNode, isRoot = false) ->
+    comp = @line.comparePoint(newNode.line.midPoint)
+    switch
+      when comp < 0 and @left then new LineSegmentRbtNode(@line, @left.insert(newNode), @right, @red)._cleanUpAfterInsert(isRoot)
+      when comp < 0 then new LineSegmentRbtNode(@line, newNode, @right, @red)._cleanUpAfterInsert(isRoot)
+      when comp > 0 and @right then new LineSegmentRbtNode(@line, @left, @right.insert(newNode), @red)._cleanUpAfterInsert(isRoot)
+      when comp > 0 then new LineSegmentRbtNode(@line, @left, newNode, @red)._cleanUpAfterInsert(isRoot)
+      # TODO: do something useful when duplicate lines are detected
+
+  delete: (item) ->
+    comp = @line.comparePoint(item.midPoint)
+    switch
+      when comp < 0 and @left  then new LineSegmentRbtNode(@line, @left.delete(item), @right, @red)
+      when comp > 0 and @right then new LineSegmentRbtNode(@line, @left, @right.delete(item), @red)
+      when comp is 0 and @left then new LineSegmentRbtNode(@left._getRightmostLine(), @left._deleteRightmostDecendant(), @right, @red)
+      when comp is 0 then @right
+      # TODO: maintain the invariants
+
+  _getRightmostLine: -> if @right then @right._getRightmostLine() else @line
+
+  _deleteRightmostDecendant: ->
+    if @right
+      new LineSegmentRbtNode(@line, @left, @right._deleteRightmostDecendant(), @red)
+      # TODO: maintain the invariants
+    else
+      @left
+
+  _cleanUpAfterInsert: (isRoot) ->
+    if not @red and @left?.red and @right?.red and (@left?.left?.red or @left?.right?.red or @right?.left?.red or @right?.right?.red)
+      # condition 4a in "Planar point location using persistent search trees"
+      @red = true
+      @left.red = false
+      @right.red = false
+    if isRoot and @red and (@left?.red and not @right or @right?.red and not @left)
+      # condition 4b
+      @red = false
+      this
+    else if not @red and @right and not @right.red and @left?.red and @left?.left?.red
+      # condition 4c
+      new LineSegmentRbtNode(@left.line, @left.left, new LineSegmentRbtNode(@line, @left.right, @right), false)
+    else if not @red and @left and not @left.red and @right?.red and @right?.right?.red
+      # condition 4c
+      new LineSegmentRbtNode(@right.line, new LineSegmentRbtNode(@line, @left, @right.left), @right.right, false)
+    else if not @red and @right and not @right.red and @left?.red and @left?.right?.red
+      # condition 4d
+      new LineSegmentRbtNode(@left.right.line, new LineSegmentRbtNode(@left.line, @left.left, @left.right.left), new LineSegmentRbtNode(@line, @left.right.right, @right), false)
+    else if not @red and @left and not @left.red and @right?.red and @right?.left?.red
+      # condition 4d
+      new LineSegmentRbtNode(@right.left.line, new LineSegmentRbtNode(@right.line, @right.left.right, @right.right), new LineSegmentRbtNode(@line, @left, @right.left.left), false)
+    else
+      this
+
+  _cleanUpAfterDelete: ->
+
+  toString: -> @line + (if @red then " red " else " black ") +  (if @left then " L:" + @left else "") + (if @right then " R:" + @right else "")
 
 class window.RbtNode
   constructor: (@key, @value) ->
-    @parent = null
     @red = true
     @children = []
     @left  = null
@@ -39,21 +99,14 @@ class window.RbtNode
     @newChildLeft = false
     @newChildTime = -1
 
-    # TODO: replace this with a query method
-  # access: (t, q) ->
-  #   switch
-  #     when q == @key then this
-  #     when q < @key then @left?.access(t, q)
-  #     when q > @key then @right?.access(t, q)
-
   insert: (t, i) ->
     switch
       when i.key < @key and t > @newChildTime and @newChildLeft     then @newChild.insert(t, i)
       when i.key < @key and @left                                   then @left.insert(t, i)
-      when i.key < @key                                             then @left = i; i.parent = this
+      when i.key < @key                                             then @left = i
       when i.key > @key and t > @newChildTime and not @newChildLeft then @newChild.insert(t, i)
       when i.key > @key and @right                                  then @right.insert(t, i)
-      when i.key > @key                                             then @right = i; i.parent = this
+      when i.key > @key                                             then @right = i
     i._cleanUpAfterInsert()
     @_updateChildren()
     # TODO: return the root
@@ -67,8 +120,6 @@ class window.RbtNode
       when i.key > @key and @right                                  then @right.delete(i)
     @_updateChildren()
     # TODO: return the root
-
-  getRoot: -> if @parent then @parent.getRoot() else this
 
   getHeight: (t) ->
     l = t > @newChildTime and @newChild and @newChildLeft and @newChild.getHeight(t) or @left?.getHeight(t) or 0
