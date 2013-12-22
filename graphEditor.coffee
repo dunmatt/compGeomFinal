@@ -45,7 +45,6 @@ keydown = ->
   if d3.event.keyCode == 65 # a
     for r in tree.roots
       alert("#{r.time}: #{r.root}")
-    # alert(tree.roots[tree.roots.length-1].root)
   if editMode
     d3.event.preventDefault()
     return if keyAlreadyDown

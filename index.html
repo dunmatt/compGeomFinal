@@ -10,5 +10,21 @@
   <script type="text/javascript" src="redblack.js" charset="utf-8"></script>
   <script type="text/javascript" src="graphEditor.js" charset="utf-8"></script>
   <script type="text/javascript" src="lineSegment.js" charset="utf-8"></script>
+
+  <h3>Directions:</h3>
+  <ol>
+  	<li>Click to place points, drag to move points around</li>
+  	<li>Shift + Drag to create edges (planar graphs only)</li>
+  	<li>Ctrl + Click to delete points (and their edges)</li>
+  	<li>When you're happy with your graph click "Toggle Query Mode" and move the mouse around.</li>
+  	<li>Press 'a' in Query Mode for a debugging dump of the fully persistent red black tree.</li>
+  </ol>
+  <h3>Ok, so that's great, but what am I looking at?</h3>
+  <h3>Future Work</h3>
+  <ul>
+  	<li>I spent entirely too much time chasing stupid issues (eg forgetting to enforce general position, coding as if a type checker had my back, etc), and ultimately there wasn't time to actually implement the optimal time bound from the paper.</li>
+  	<li>Right now there's no clean way to illustrate the fact that the red black tree is in fact persistent, instead the user has to move the mouse and trust that things aren't being recomputed unnecessarily... or alternatively they could press 'a' and learn to read my debugging format.</li>
+  	<li>Right now the red black tree doesn't rebalance after deletions and cursory attempts to add that failed (see above regarding the lack of a type checker).</li>
+  </ul>
 </body>
 </html>
