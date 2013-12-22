@@ -126,28 +126,31 @@ reset = ->
   drawVertices()
 
 drawTree = ->
-  treeEnd = rightmostPointLeftOfMouse()
-  if lastTreeEnd isnt treeEnd
-    d3.selectAll(".rbtLink").remove()
-    root = tree.getRoot(d3.event.x)
-    if root?.height()
-      drawSubTree(root, treeEnd.x / (root.height()-1))
-    lastTreeEnd = treeEnd
+  d3.selectAll(".rbtLink").remove()
+  root = tree.getRoot(d3.event.x)
+  if root
+    step = d3.event.x / (root.height())
+    ry = height / 2
+    gx = step / 4
+    hx = step * 3 / 4
+    cy = root.line.pointAt(step)
+    treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{step} #{cy}").attr("class", "rbtLink")
+    drawChildren(root, step)
 
-drawSubTree = (root, levelSize, curDepth = 0) ->
-  rx = curDepth * levelSize
-  ry = root.line.midPoint.y
-  cx = rx + levelSize
-  gx = rx + (levelSize / 4)
-  hx = rx + (levelSize * 3 / 4)
-  if root.left
-    cy = root.left.line.midPoint.y
+drawChildren = (origin, step, depth = 1) ->
+  rx = step * depth
+  ry = origin.line.pointAt(rx)
+  cx = rx + step
+  gx = rx + (step / 4)
+  hx = rx + (step * 3 / 4)
+  if origin.left
+    cy = origin.left.line.pointAt(cx)
     treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
-    drawSubTree(root.left, levelSize, curDepth + 1)
-  if root.right
-    cy = root.right.line.midPoint.y
+    drawChildren(origin.left, step, depth + 1)
+  if origin.right
+    cy = origin.right.line.pointAt(cx)
     treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
-    drawSubTree(root.right, levelSize, curDepth + 1)
+    drawChildren(origin.right, step, depth + 1)
 
 drawSlabs = ->
   slabLines = slabLines.data(points)
