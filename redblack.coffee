@@ -69,16 +69,16 @@ class window.LineSegmentRbtNode
       # condition 4b
       @red = false
       this
-    else if not @red and @right and not @right.red and @left?.red and @left?.left?.red
+    else if not @red and not @right?.red and @left?.red and @left?.left?.red
       # condition 4c
       new LineSegmentRbtNode(@left.line, @left.left, new LineSegmentRbtNode(@line, @left.right, @right), false)
-    else if not @red and @left and not @left.red and @right?.red and @right?.right?.red
+    else if not @red and not @left?.red and @right?.red and @right?.right?.red
       # condition 4c
       new LineSegmentRbtNode(@right.line, new LineSegmentRbtNode(@line, @left, @right.left), @right.right, false)
-    else if not @red and @right and not @right.red and @left?.red and @left?.right?.red
+    else if not @red and not @right?.red and @left?.red and @left?.right?.red
       # condition 4d
       new LineSegmentRbtNode(@left.right.line, new LineSegmentRbtNode(@left.line, @left.left, @left.right.left), new LineSegmentRbtNode(@line, @left.right.right, @right), false)
-    else if not @red and @left and not @left.red and @right?.red and @right?.left?.red
+    else if not @red and not @left?.red and @right?.red and @right?.left?.red
       # condition 4d
       new LineSegmentRbtNode(@right.left.line, new LineSegmentRbtNode(@right.line, @right.left.right, @right.right), new LineSegmentRbtNode(@line, @left, @right.left.left), false)
     else

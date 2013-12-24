@@ -124,7 +124,7 @@
     };
 
     LineSegmentRbtNode.prototype._cleanUpAfterInsert = function(isRoot) {
-      var _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+      var _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref24, _ref25, _ref26, _ref27, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
       if (!this.red && ((_ref = this.left) != null ? _ref.red : void 0) && ((_ref1 = this.right) != null ? _ref1.red : void 0) && (((_ref2 = this.left) != null ? (_ref3 = _ref2.left) != null ? _ref3.red : void 0 : void 0) || ((_ref4 = this.left) != null ? (_ref5 = _ref4.right) != null ? _ref5.red : void 0 : void 0) || ((_ref6 = this.right) != null ? (_ref7 = _ref6.left) != null ? _ref7.red : void 0 : void 0) || ((_ref8 = this.right) != null ? (_ref9 = _ref8.right) != null ? _ref9.red : void 0 : void 0))) {
         this.red = true;
         this.left.red = false;
@@ -133,13 +133,13 @@
       if (isRoot && this.red && (((_ref10 = this.left) != null ? _ref10.red : void 0) && !this.right || ((_ref11 = this.right) != null ? _ref11.red : void 0) && !this.left)) {
         this.red = false;
         return this;
-      } else if (!this.red && this.right && !this.right.red && ((_ref12 = this.left) != null ? _ref12.red : void 0) && ((_ref13 = this.left) != null ? (_ref14 = _ref13.left) != null ? _ref14.red : void 0 : void 0)) {
+      } else if (!this.red && !((_ref12 = this.right) != null ? _ref12.red : void 0) && ((_ref13 = this.left) != null ? _ref13.red : void 0) && ((_ref14 = this.left) != null ? (_ref15 = _ref14.left) != null ? _ref15.red : void 0 : void 0)) {
         return new LineSegmentRbtNode(this.left.line, this.left.left, new LineSegmentRbtNode(this.line, this.left.right, this.right), false);
-      } else if (!this.red && this.left && !this.left.red && ((_ref15 = this.right) != null ? _ref15.red : void 0) && ((_ref16 = this.right) != null ? (_ref17 = _ref16.right) != null ? _ref17.red : void 0 : void 0)) {
+      } else if (!this.red && !((_ref16 = this.left) != null ? _ref16.red : void 0) && ((_ref17 = this.right) != null ? _ref17.red : void 0) && ((_ref18 = this.right) != null ? (_ref19 = _ref18.right) != null ? _ref19.red : void 0 : void 0)) {
         return new LineSegmentRbtNode(this.right.line, new LineSegmentRbtNode(this.line, this.left, this.right.left), this.right.right, false);
-      } else if (!this.red && this.right && !this.right.red && ((_ref18 = this.left) != null ? _ref18.red : void 0) && ((_ref19 = this.left) != null ? (_ref20 = _ref19.right) != null ? _ref20.red : void 0 : void 0)) {
+      } else if (!this.red && !((_ref20 = this.right) != null ? _ref20.red : void 0) && ((_ref21 = this.left) != null ? _ref21.red : void 0) && ((_ref22 = this.left) != null ? (_ref23 = _ref22.right) != null ? _ref23.red : void 0 : void 0)) {
         return new LineSegmentRbtNode(this.left.right.line, new LineSegmentRbtNode(this.left.line, this.left.left, this.left.right.left), new LineSegmentRbtNode(this.line, this.left.right.right, this.right), false);
-      } else if (!this.red && this.left && !this.left.red && ((_ref21 = this.right) != null ? _ref21.red : void 0) && ((_ref22 = this.right) != null ? (_ref23 = _ref22.left) != null ? _ref23.red : void 0 : void 0)) {
+      } else if (!this.red && !((_ref24 = this.left) != null ? _ref24.red : void 0) && ((_ref25 = this.right) != null ? _ref25.red : void 0) && ((_ref26 = this.right) != null ? (_ref27 = _ref26.left) != null ? _ref27.red : void 0 : void 0)) {
         return new LineSegmentRbtNode(this.right.left.line, new LineSegmentRbtNode(this.right.line, this.right.left.right, this.right.right), new LineSegmentRbtNode(this.line, this.left, this.right.left.left), false);
       } else {
         return this;

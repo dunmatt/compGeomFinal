@@ -19,7 +19,7 @@
   	<li>Ctrl + Click to delete points (and their edges)</li>
   	<li>When you're happy with your graph click "Toggle Query Mode" and move the mouse (which represents a query point) around.</li>
   	<li>Press 'a' in Query Mode for a debugging dump of the fully persistent red black tree.</li>
-    <li>Make sure to make the graph crazy enough that some time slabs contain many (>3) edges, otherwise the binary search tree won't look like much.</li>
+    <li>Make sure to make the graph is crazy enough that some time slabs contain many (>3) edges, otherwise the binary search tree won't look like much.</li>
   </ol>
   <h3>Ok, so that's great, but what am I looking at?</h3>
   <p>Planar point location is the problem of quickly determining which polygon each of a series of queries is in.  Because there are potentially many queries we want to preprocess the graph to ensure fast querying with minimal memory overhead.  The algorithm here (first presented by Sarnak and Tarjan in Planar Point Location Using Persistent Search Trees), is to store the edges of the planar graph in a partially persistent binary search tree.  Because it is a BST, queries and updates can be done in O(logn) time, and thanks to a fancy trick and amortized analysis the entire tree only requires O(n) space.</p>
