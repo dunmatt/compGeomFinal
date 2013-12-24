@@ -130,26 +130,29 @@ drawTree = ->
   if root
     step = d3.event.x / (root.height())
     ry = height / 2
-    gx = step / 4
-    hx = step * 3 / 4
-    cy = root.line.pointAt(step)
-    treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{step} #{cy}").attr("class", "rbtLink")
-    drawChildren(root, step)
+    cx = Math.max(step, root.line.a.x)
+    cy = root.line.pointAt(cx)
+    gx = cx / 4
+    hx = cx * 3 / 4
+    treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    drawChildren(root, {x: cx, y: cy}, d3.event.x, root.height())
 
-drawChildren = (origin, step, depth = 1) ->
-  rx = step * depth
-  ry = origin.line.pointAt(rx)
-  cx = rx + step
-  gx = rx + (step / 4)
-  hx = rx + (step * 3 / 4)
+drawChildren = (origin, start, endX, treeHeight, depth = 1) ->
+  step = (endX - start.x) / (treeHeight - depth)
   if origin.left
+    cx = Math.max(start.x + step, origin.left.line.a.x)
     cy = origin.left.line.pointAt(cx)
-    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
-    drawChildren(origin.left, step, depth + 1)
+    gx = start.x + ((cx - start.x) / 4)
+    hx = start.x + ((cx - start.x) * 3 / 4)
+    treeGroup.append("path").attr("d", "M#{start.x} #{start.y}C#{hx} #{start.y} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    drawChildren(origin.left, {x: cx, y: cy}, endX, treeHeight, depth + 1)
   if origin.right
+    cx = Math.max(start.x + step, origin.right.line.a.x)
     cy = origin.right.line.pointAt(cx)
-    treeGroup.append("path").attr("d", "M#{rx} #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
-    drawChildren(origin.right, step, depth + 1)
+    gx = start.x + ((cx - start.x) / 4)
+    hx = start.x + ((cx - start.x) * 3 / 4)
+    treeGroup.append("path").attr("d", "M#{start.x} #{start.y}C#{hx} #{start.y} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
+    drawChildren(origin.right, {x: cx, y: cy}, endX, treeHeight, depth + 1)
 
 drawSlabs = ->
   slabLines = slabLines.data(points)
