@@ -228,7 +228,6 @@
       cy = root.line.pointAt(cx);
       gx = cx / 4;
       hx = cx * 3 / 4;
-      treeGroup.append("path").attr("d", "M0 " + ry + "C" + hx + " " + ry + " " + gx + " " + cy + " " + cx + " " + cy).attr("class", "rbtLink");
       return drawChildren(root, {
         x: cx,
         y: cy
