@@ -218,7 +218,7 @@
   };
 
   drawTree = function() {
-    var cx, cy, gx, hx, root, ry, step;
+    var cx, cy, root, ry, step;
     d3.selectAll(".rbtLink").remove();
     root = tree.getRoot(d3.event.x);
     if (root) {
@@ -226,8 +226,6 @@
       ry = height / 2;
       cx = Math.max(step, root.line.a.x);
       cy = root.line.pointAt(cx);
-      gx = cx / 4;
-      hx = cx * 3 / 4;
       return drawChildren(root, {
         x: cx,
         y: cy

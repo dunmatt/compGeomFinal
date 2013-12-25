@@ -132,8 +132,8 @@ drawTree = ->
     ry = height / 2
     cx = Math.max(step, root.line.a.x)
     cy = root.line.pointAt(cx)
-    gx = cx / 4
-    hx = cx * 3 / 4
+    # gx = cx / 4
+    # hx = cx * 3 / 4
     # treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawChildren(root, {x: cx, y: cy}, d3.event.x, root.height())
 

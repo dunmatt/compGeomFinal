@@ -8,32 +8,37 @@
       this.roots = [];
     }
 
-    RedBlackTree.prototype.insert = function(t, i) {
+    RedBlackTree.prototype.insert = function(time, item) {
       var root;
-      if (t >= this.lastModification) {
-        root = this.getRoot(t);
+      if (time >= this.lastModification) {
+        root = this.getRoot(time);
         if (root) {
-          return this._trackNewRoot(t, root.insert(new LineSegmentRbtNode(i), true));
+          this._trackNewRoot(time, root.insert(new LineSegmentRbtNode(item), true));
         } else {
-          return this._trackNewRoot(t, new LineSegmentRbtNode(i));
+          this._trackNewRoot(time, new LineSegmentRbtNode(item));
         }
       }
+      return alert(this.getRoot(time));
     };
 
-    RedBlackTree.prototype["delete"] = function(t, i) {
-      if (t >= this.lastModification) {
-        return this._trackNewRoot(t, this.getRoot(t)["delete"](i));
+    RedBlackTree.prototype["delete"] = function(time, item) {
+      if (!this.getRoot(time)) {
+        alert("no root at " + time);
       }
+      if (time >= this.lastModification) {
+        this._trackNewRoot(time, this.getRoot(time)["delete"](item));
+      }
+      return alert(this.getRoot(time));
     };
 
-    RedBlackTree.prototype.height = function(t) {
-      return this.getRoot(t).height();
+    RedBlackTree.prototype.height = function(time) {
+      return this.getRoot(time).height();
     };
 
-    RedBlackTree.prototype.getRoot = function(t) {
+    RedBlackTree.prototype.getRoot = function(time) {
       var prev;
       prev = this.roots.filter(function(a) {
-        return a.time <= t;
+        return a.time <= time;
       });
       if (prev.length) {
         return prev.reduce(function(a, b) {
@@ -48,10 +53,10 @@
       }
     };
 
-    RedBlackTree.prototype._trackNewRoot = function(t, n) {
-      this.lastModification = t;
+    RedBlackTree.prototype._trackNewRoot = function(time, n) {
+      this.lastModification = time;
       return this.roots[this.roots.length] = {
-        time: t,
+        time: time,
         root: n
       };
     };
@@ -79,7 +84,7 @@
       if (isRoot == null) {
         isRoot = false;
       }
-      comp = this.line.comparePoint(newNode.line.midPoint);
+      comp = this.line.comparePoint(newNode.line.plusEpsilon);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left.insert(newNode), this.right, this.red)._cleanUpAfterInsert(isRoot);
@@ -94,7 +99,7 @@
 
     LineSegmentRbtNode.prototype["delete"] = function(item) {
       var comp;
-      comp = this.line.comparePoint(item.midPoint);
+      comp = this.line.comparePoint(item.plusEpsilon);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left["delete"](item), this.right, this.red);
@@ -130,7 +135,7 @@
         this.left.red = false;
         this.right.red = false;
       }
-      if (isRoot && this.red && (((_ref10 = this.left) != null ? _ref10.red : void 0) && !this.right || ((_ref11 = this.right) != null ? _ref11.red : void 0) && !this.left)) {
+      if (isRoot && this.red && (((_ref10 = this.left) != null ? _ref10.red : void 0) || ((_ref11 = this.right) != null ? _ref11.red : void 0))) {
         this.red = false;
         return this;
       } else if (!this.red && !((_ref12 = this.right) != null ? _ref12.red : void 0) && ((_ref13 = this.left) != null ? _ref13.red : void 0) && ((_ref14 = this.left) != null ? (_ref15 = _ref14.left) != null ? _ref15.red : void 0 : void 0)) {

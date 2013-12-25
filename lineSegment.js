@@ -4,17 +4,21 @@
   window.LineSegment = (function() {
 
     function LineSegment(a, b) {
-      var _ref;
+      var xe, _ref;
       this.a = a;
       this.b = b;
       if (this.a.x > this.b.x) {
         _ref = [this.b, this.a], this.a = _ref[0], this.b = _ref[1];
       }
       this.slope = (this.b.y - this.a.y) / (this.b.x - this.a.x);
-      this.yIntercept = this.a.y - this.a.x * this.slope;
-      this.midPoint = {
-        x: (a.x + b.x) / 2.0,
-        y: (a.y + b.y) / 2.0
+      this.yIntercept = this.a.y - (this.a.x * this.slope);
+      if (this.a.x > this.b.x) {
+        alert("BIG TROUBLE:  a:" + this.a.x + " b:" + this.b.x);
+      }
+      xe = this.a.x + .0001;
+      this.plusEpsilon = {
+        x: xe,
+        y: this.pointAt(xe)
       };
     }
 

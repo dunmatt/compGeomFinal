@@ -4,27 +4,33 @@ class window.RedBlackTree
     @lastModification = -99999999
     @roots = []
 
-  insert: (t, i) ->
-    if t >= @lastModification
-      root = @getRoot(t)
+  insert: (time, item) ->
+    # alert("inserting")
+    if time >= @lastModification
+      root = @getRoot(time)
       if root
-        @_trackNewRoot(t, root.insert(new LineSegmentRbtNode(i), true))
+        @_trackNewRoot(time, root.insert(new LineSegmentRbtNode(item), true))
       else
-        @_trackNewRoot(t, new LineSegmentRbtNode(i))
+        # alert("wait wat")
+        @_trackNewRoot(time, new LineSegmentRbtNode(item))
+    alert(@getRoot(time))
 
-  delete: (t, i) ->
-    if t >= @lastModification
-      @_trackNewRoot(t, @getRoot(t).delete(i))
+  delete: (time, item) ->
+    if not @getRoot(time)
+      alert("no root at " + time)
+    if time >= @lastModification
+      @_trackNewRoot(time, @getRoot(time).delete(item))
+    alert(@getRoot(time))
 
-  height: (t) -> @getRoot(t).height()
+  height: (time) -> @getRoot(time).height()
 
-  getRoot: (t) ->
-    prev = @roots.filter((a) -> a.time <= t)
+  getRoot: (time) ->
+    prev = @roots.filter((a) -> a.time <= time)
     if prev.length then prev.reduce((a, b) -> if a.time > b.time then a else b).root else null
 
-  _trackNewRoot: (t, n) ->
-    @lastModification = t
-    @roots[@roots.length] = {time: t, root: n}
+  _trackNewRoot: (time, n) ->
+    @lastModification = time
+    @roots[@roots.length] = {time: time, root: n}
 
 class window.LineSegmentRbtNode
   constructor: (@line, @left, @right, @red = true) ->
@@ -33,7 +39,9 @@ class window.LineSegmentRbtNode
   height: -> 1 + Math.max(@left?.height() or 0, @right?.height() or 0)
 
   insert: (newNode, isRoot = false) ->
-    comp = @line.comparePoint(newNode.line.midPoint)
+    comp = @line.comparePoint(newNode.line.plusEpsilon)
+    # alert("#{comp} = #{@line} \\ (#{newNode.line.plusEpsilon.x}, #{newNode.line.plusEpsilon.y})")
+    # alert(newNode.line.a.x + " " + comp)
     switch
       when comp < 0 and @left then new LineSegmentRbtNode(@line, @left.insert(newNode), @right, @red)._cleanUpAfterInsert(isRoot)
       when comp < 0 then new LineSegmentRbtNode(@line, newNode, @right, @red)._cleanUpAfterInsert(isRoot)
@@ -42,7 +50,8 @@ class window.LineSegmentRbtNode
       # TODO: do something useful when duplicate lines are detected
 
   delete: (item) ->
-    comp = @line.comparePoint(item.midPoint)
+    comp = @line.comparePoint(item.plusEpsilon)
+    # alert("deleting " + item.a.x)
     switch
       when comp < 0 and @left  then new LineSegmentRbtNode(@line, @left.delete(item), @right, @red)
       when comp > 0 and @right then new LineSegmentRbtNode(@line, @left, @right.delete(item), @red)
@@ -65,7 +74,7 @@ class window.LineSegmentRbtNode
       @red = true
       @left.red = false
       @right.red = false
-    if isRoot and @red and (@left?.red and not @right or @right?.red and not @left)
+    if isRoot and @red and (@left?.red or @right?.red)
       # condition 4b
       @red = false
       this
