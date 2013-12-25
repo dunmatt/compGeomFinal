@@ -39,7 +39,7 @@ class window.LineSegmentRbtNode
   height: -> 1 + Math.max(@left?.height() or 0, @right?.height() or 0)
 
   insert: (newNode, isRoot = false) ->
-    comp = @line.comparePoint(newNode.line.plusEpsilon)
+    comp = @line.comparePoint(newNode.line.a) or @line.comparePoint(newNode.line.b)
     # alert("#{comp} = #{@line} \\ (#{newNode.line.plusEpsilon.x}, #{newNode.line.plusEpsilon.y})")
     # alert(newNode.line.a.x + " " + comp)
     switch
@@ -50,7 +50,7 @@ class window.LineSegmentRbtNode
       # TODO: do something useful when duplicate lines are detected
 
   delete: (item) ->
-    comp = @line.comparePoint(item.plusEpsilon)
+    comp = @line.comparePoint(item.a) or @line.comparePoint(item.b)
     # alert("deleting " + item.a.x)
     switch
       when comp < 0 and @left  then new LineSegmentRbtNode(@line, @left.delete(item), @right, @red)

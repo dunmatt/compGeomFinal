@@ -82,7 +82,7 @@
       if (isRoot == null) {
         isRoot = false;
       }
-      comp = this.line.comparePoint(newNode.line.plusEpsilon);
+      comp = this.line.comparePoint(newNode.line.a) || this.line.comparePoint(newNode.line.b);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left.insert(newNode), this.right, this.red)._cleanUpAfterInsert(isRoot);
@@ -97,7 +97,7 @@
 
     LineSegmentRbtNode.prototype["delete"] = function(item) {
       var comp;
-      comp = this.line.comparePoint(item.plusEpsilon);
+      comp = this.line.comparePoint(item.a) || this.line.comparePoint(item.b);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left["delete"](item), this.right, this.red);

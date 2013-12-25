@@ -131,7 +131,7 @@ drawTree = ->
     step = d3.event.x / (root.height())
     ry = height / 2
     cx = Math.max(step, root.line.a.x)
-    cy = root.line.pointAt(cx)
+    cy = root.line.yCoordAt(cx)
     # gx = cx / 4
     # hx = cx * 3 / 4
     # treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
@@ -141,14 +141,14 @@ drawChildren = (origin, start, endX, treeHeight, depth = 1) ->
   step = (endX - start.x) / (treeHeight - depth)
   if origin.left
     cx = Math.max(start.x + step, origin.left.line.a.x)
-    cy = origin.left.line.pointAt(cx)
+    cy = origin.left.line.yCoordAt(cx)
     gx = start.x + ((cx - start.x) / 4)
     hx = start.x + ((cx - start.x) * 3 / 4)
     treeGroup.append("path").attr("d", "M#{start.x} #{start.y}C#{hx} #{start.y} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawChildren(origin.left, {x: cx, y: cy}, endX, treeHeight, depth + 1)
   if origin.right
     cx = Math.max(start.x + step, origin.right.line.a.x)
-    cy = origin.right.line.pointAt(cx)
+    cy = origin.right.line.yCoordAt(cx)
     gx = start.x + ((cx - start.x) / 4)
     hx = start.x + ((cx - start.x) * 3 / 4)
     treeGroup.append("path").attr("d", "M#{start.x} #{start.y}C#{hx} #{start.y} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")

@@ -4,7 +4,7 @@
   window.LineSegment = (function() {
 
     function LineSegment(a, b) {
-      var xe, _ref;
+      var _ref;
       this.a = a;
       this.b = b;
       if (this.a.x > this.b.x) {
@@ -12,18 +12,15 @@
       }
       this.slope = (this.b.y - this.a.y) / (this.b.x - this.a.x);
       this.yIntercept = this.a.y - (this.a.x * this.slope);
-      xe = this.a.x + .0001;
-      this.plusEpsilon = {
-        x: xe,
-        y: this.pointAt(xe)
-      };
+      this.xe = this.a.x + .0001;
+      this.plusEpsilon = this.pointAt(this.xe);
     }
 
     LineSegment.prototype.comparePoint = function(pt) {
       var onLine;
-      onLine = this.pointAt(pt.x);
+      onLine = this.yCoordAt(pt.x);
       switch (false) {
-        case pt.y !== onLine:
+        case !(Math.abs(pt.y - onLine) < .0001):
           return 0;
         case !(pt.y > onLine):
           return -1;
@@ -32,8 +29,15 @@
       }
     };
 
-    LineSegment.prototype.pointAt = function(x) {
+    LineSegment.prototype.yCoordAt = function(x) {
       return x * this.slope + this.yIntercept;
+    };
+
+    LineSegment.prototype.pointAt = function(x) {
+      return {
+        x: x,
+        y: this.yCoordAt(x)
+      };
     };
 
     LineSegment.prototype.toString = function() {
