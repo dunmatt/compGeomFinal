@@ -4,8 +4,6 @@ class window.LineSegment
       [@a, @b] = [@b, @a]  # all edges go left to right so that they are created before they are deleted
     @slope = (@b.y - @a.y) / (@b.x - @a.x)
     @yIntercept = @a.y - (@a.x * @slope)
-    if @a.x > @b.x
-      alert("BIG TROUBLE:  a:#{@a.x} b:#{@b.x}")
     xe = @a.x + .0001
     @plusEpsilon = {x: xe, y: @pointAt(xe)}
 

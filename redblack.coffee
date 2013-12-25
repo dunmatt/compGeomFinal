@@ -13,14 +13,14 @@ class window.RedBlackTree
       else
         # alert("wait wat")
         @_trackNewRoot(time, new LineSegmentRbtNode(item))
-    alert(@getRoot(time))
+    # alert(@getRoot(time))
 
   delete: (time, item) ->
     if not @getRoot(time)
       alert("no root at " + time)
     if time >= @lastModification
       @_trackNewRoot(time, @getRoot(time).delete(item))
-    alert(@getRoot(time))
+    # alert(@getRoot(time))
 
   height: (time) -> @getRoot(time).height()
 
@@ -57,6 +57,7 @@ class window.LineSegmentRbtNode
       when comp > 0 and @right then new LineSegmentRbtNode(@line, @left, @right.delete(item), @red)
       when comp is 0 and @left then new LineSegmentRbtNode(@left._getRightmostLine(), @left._deleteRightmostDecendant(), @right, @red)
       when comp is 0 then @right
+      else alert("HUGE PROBLEM, delete failed to traverse the tree")
       # TODO: maintain the invariants
 
   _getRightmostLine: -> if @right then @right._getRightmostLine() else @line
@@ -69,27 +70,27 @@ class window.LineSegmentRbtNode
       @left
 
   _cleanUpAfterInsert: (isRoot) ->
+    # condition 4a in "Planar point location using persistent search trees"
     if not @red and @left?.red and @right?.red and (@left?.left?.red or @left?.right?.red or @right?.left?.red or @right?.right?.red)
-      # condition 4a in "Planar point location using persistent search trees"
       @red = true
       @left.red = false
       @right.red = false
+    # condition 4b
     if isRoot and @red and (@left?.red or @right?.red)
-      # condition 4b
       @red = false
       this
+    # condition 4c
     else if not @red and not @right?.red and @left?.red and @left?.left?.red
-      # condition 4c
       new LineSegmentRbtNode(@left.line, @left.left, new LineSegmentRbtNode(@line, @left.right, @right), false)
+    # condition 4c
     else if not @red and not @left?.red and @right?.red and @right?.right?.red
-      # condition 4c
       new LineSegmentRbtNode(@right.line, new LineSegmentRbtNode(@line, @left, @right.left), @right.right, false)
+    # condition 4d
     else if not @red and not @right?.red and @left?.red and @left?.right?.red
-      # condition 4d
       new LineSegmentRbtNode(@left.right.line, new LineSegmentRbtNode(@left.line, @left.left, @left.right.left), new LineSegmentRbtNode(@line, @left.right.right, @right), false)
+    # condition 4d
     else if not @red and not @left?.red and @right?.red and @right?.left?.red
-      # condition 4d
-      new LineSegmentRbtNode(@right.left.line, new LineSegmentRbtNode(@right.line, @right.left.right, @right.right), new LineSegmentRbtNode(@line, @left, @right.left.left), false)
+      new LineSegmentRbtNode(@right.left.line, new LineSegmentRbtNode(@line, @left, @right.left.left), new LineSegmentRbtNode(@right.line, @right.left.right, @right.right), false)
     else
       this
 

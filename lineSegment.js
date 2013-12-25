@@ -12,9 +12,6 @@
       }
       this.slope = (this.b.y - this.a.y) / (this.b.x - this.a.x);
       this.yIntercept = this.a.y - (this.a.x * this.slope);
-      if (this.a.x > this.b.x) {
-        alert("BIG TROUBLE:  a:" + this.a.x + " b:" + this.b.x);
-      }
       xe = this.a.x + .0001;
       this.plusEpsilon = {
         x: xe,

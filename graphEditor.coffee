@@ -191,6 +191,12 @@ drawVertices = ->
                   .call(drag)
   vertices.exit().remove()
 
+compareEvents = (a, b) ->
+  if a[0] is b[0]
+    if not a[1] then -1 else 1
+  else
+    if a[0] < b[0] then -1 else 1
+
 toggleEditMode = ->
   editMode = not svg.classed(editModeClass)
   svg.classed(editModeClass, editMode)
@@ -201,7 +207,7 @@ toggleEditMode = ->
     # make a list of all the creations and all the deletions, with timestamps
     events = ([seg.a.x, true, seg] for seg in segments).concat(([seg.b.x, false, seg] for seg in segments))
     # sort chonologically
-    events.sort((a, b) -> if a[0] < b[0] then -1 else 1)
+    events.sort(compareEvents)
     # populate (and depopulate) the rbt
     events.forEach((e) -> if e[1] then tree.insert(e[0], e[2]) else tree.delete(e[0], e[2]))
     # alert(tree.roots.length)

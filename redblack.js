@@ -13,12 +13,11 @@
       if (time >= this.lastModification) {
         root = this.getRoot(time);
         if (root) {
-          this._trackNewRoot(time, root.insert(new LineSegmentRbtNode(item), true));
+          return this._trackNewRoot(time, root.insert(new LineSegmentRbtNode(item), true));
         } else {
-          this._trackNewRoot(time, new LineSegmentRbtNode(item));
+          return this._trackNewRoot(time, new LineSegmentRbtNode(item));
         }
       }
-      return alert(this.getRoot(time));
     };
 
     RedBlackTree.prototype["delete"] = function(time, item) {
@@ -26,9 +25,8 @@
         alert("no root at " + time);
       }
       if (time >= this.lastModification) {
-        this._trackNewRoot(time, this.getRoot(time)["delete"](item));
+        return this._trackNewRoot(time, this.getRoot(time)["delete"](item));
       }
-      return alert(this.getRoot(time));
     };
 
     RedBlackTree.prototype.height = function(time) {
@@ -109,6 +107,8 @@
           return new LineSegmentRbtNode(this.left._getRightmostLine(), this.left._deleteRightmostDecendant(), this.right, this.red);
         case comp !== 0:
           return this.right;
+        default:
+          return alert("HUGE PROBLEM, delete failed to traverse the tree");
       }
     };
 
@@ -145,7 +145,7 @@
       } else if (!this.red && !((_ref20 = this.right) != null ? _ref20.red : void 0) && ((_ref21 = this.left) != null ? _ref21.red : void 0) && ((_ref22 = this.left) != null ? (_ref23 = _ref22.right) != null ? _ref23.red : void 0 : void 0)) {
         return new LineSegmentRbtNode(this.left.right.line, new LineSegmentRbtNode(this.left.line, this.left.left, this.left.right.left), new LineSegmentRbtNode(this.line, this.left.right.right, this.right), false);
       } else if (!this.red && !((_ref24 = this.left) != null ? _ref24.red : void 0) && ((_ref25 = this.right) != null ? _ref25.red : void 0) && ((_ref26 = this.right) != null ? (_ref27 = _ref26.left) != null ? _ref27.red : void 0 : void 0)) {
-        return new LineSegmentRbtNode(this.right.left.line, new LineSegmentRbtNode(this.right.line, this.right.left.right, this.right.right), new LineSegmentRbtNode(this.line, this.left, this.right.left.left), false);
+        return new LineSegmentRbtNode(this.right.left.line, new LineSegmentRbtNode(this.line, this.left, this.right.left.left), new LineSegmentRbtNode(this.right.line, this.right.left.right, this.right.right), false);
       } else {
         return this;
       }
