@@ -1,4 +1,4 @@
-points = []
+window.points = []
 lines = []
 tree = null
 keyAlreadyDown = false
@@ -23,6 +23,8 @@ edges = svg.append("svg:g").selectAll("line")
 vertices = svg.append("svg:g").selectAll("circle")
 
 addEdge = (v, e) -> v.edges[v.edges.length] = e
+
+window.deleteAllVertices = -> lines.length = 0; points.length = 0
 
 deleteVertex = (v) ->
   lines = (l for l in lines when l not in v.edges)
@@ -82,6 +84,11 @@ dragmove = (d) ->
       d3.select(this).datum().y = d3.event.y
       reset()
 
+window.addEdgeBothWays = (a, b) -> 
+  lines[lines.length] = {a: a, b: b}
+  addEdge(a, lines[lines.length-1])
+  addEdge(b, lines[lines.length-1])
+
 dragended = (d) ->
   if editMode
     d3.select(this).classed("dragging", false)
@@ -91,9 +98,7 @@ dragended = (d) ->
                         x = t.x - m[0]
                         y = t.y - m[1]
                         if Math.sqrt(x*x + y*y) < radius
-                          lines[lines.length] = {a: tentativeEdge.origin.datum(), b: t}
-                          addEdge(tentativeEdge.origin.datum(), lines[lines.length-1])
-                          addEdge(t, lines[lines.length-1]) )
+                          addEdgeBothWays(tentativeEdge.origin.datum(), t))
       tentativeEdge.line.remove()
       tentativeEdge = null
     reset()
@@ -102,6 +107,8 @@ drag = d3.behavior.drag()
   .on("drag", dragmove)
   .on("dragstart", dragstarted)
   .on("dragend", dragended)
+
+window.addPt = (x, y) -> points[points.length] = {x: x, y: y, edges: []}
 
 click = ->
   if editMode
@@ -114,10 +121,10 @@ click = ->
                        if Math.sqrt(x*x + y*y) < radius
                          deleteVertex(t))
     else
-      points[points.length] = {x: d3.mouse(this)[0], y: d3.mouse(this)[1], edges: []}
+      addPt(d3.mouse(this)[0], d3.mouse(this)[1])
     reset()
 
-reset = ->
+window.reset = ->
   if not editMode
     drawTree()
   drawSlabs()
@@ -210,7 +217,6 @@ toggleEditMode = ->
     events.sort(compareEvents)
     # populate (and depopulate) the rbt
     events.forEach((e) -> if e[1] then tree.insert(e[0], e[2]) else tree.delete(e[0], e[2]))
-    # alert(tree.roots.length)
 
 svg.on("click", click).on("mousemove", mousemove)
 d3.select(window).on("keyup", keyup)

@@ -12,8 +12,6 @@
       }
       this.slope = (this.b.y - this.a.y) / (this.b.x - this.a.x);
       this.yIntercept = this.a.y - (this.a.x * this.slope);
-      this.xe = this.a.x + .0001;
-      this.plusEpsilon = this.pointAt(this.xe);
     }
 
     LineSegment.prototype.comparePoint = function(pt) {

@@ -5,7 +5,6 @@ class window.RedBlackTree
     @roots = []
 
   insert: (time, item) ->
-    # alert("inserting")
     if time >= @lastModification
       root = @getRoot(time)
       if root
@@ -39,8 +38,6 @@ class window.LineSegmentRbtNode
 
   insert: (newNode, isRoot = false) ->
     comp = @line.compareLine(newNode.line)
-    # alert("#{comp} = #{@line} \\ (#{newNode.line.plusEpsilon.x}, #{newNode.line.plusEpsilon.y})")
-    # alert(newNode.line.a.x + " " + comp)
     switch
       when comp < 0 and @left then new LineSegmentRbtNode(@line, @left.insert(newNode), @right, @red)._cleanUpAfterInsert(isRoot)
       when comp < 0 then new LineSegmentRbtNode(@line, newNode, @right, @red)._cleanUpAfterInsert(isRoot)
@@ -50,7 +47,6 @@ class window.LineSegmentRbtNode
 
   delete: (item) ->
     comp = @line.compareLine(item)
-    # alert("deleting " + item.a.x)
     switch
       when comp < 0 and @left  then new LineSegmentRbtNode(@line, @left.delete(item), @right, @red)
       when comp > 0 and @right then new LineSegmentRbtNode(@line, @left, @right.delete(item), @red)
