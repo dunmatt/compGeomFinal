@@ -20,6 +20,8 @@
       var onLine;
       onLine = this.yCoordAt(pt.x);
       switch (false) {
+        case !(this.a.x > pt.x || this.b.x < pt.x):
+          return 0;
         case !(Math.abs(pt.y - onLine) < .0001):
           return 0;
         case !(pt.y > onLine):
@@ -27,6 +29,10 @@
         case !(pt.y < onLine):
           return 1;
       }
+    };
+
+    LineSegment.prototype.compareLine = function(line) {
+      return this.comparePoint(line.a) || this.comparePoint(line.b) || this.comparePoint(line.pointAt(this.a.x)) || this.comparePoint(line.pointAt(this.b.x));
     };
 
     LineSegment.prototype.yCoordAt = function(x) {

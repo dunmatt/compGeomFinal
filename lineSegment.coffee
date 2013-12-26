@@ -10,9 +10,12 @@ class window.LineSegment
   comparePoint: (pt) ->
     onLine = @yCoordAt(pt.x)
     switch
+      when @a.x > pt.x or @b.x < pt.x then 0
       when Math.abs(pt.y - onLine) < .0001 then 0
       when pt.y > onLine then -1  # counterintuitive negative here beause the y axis is flipped
       when pt.y < onLine then 1
+
+  compareLine: (line) -> @comparePoint(line.a) or @comparePoint(line.b) or @comparePoint(line.pointAt(@a.x)) or @comparePoint(line.pointAt(@b.x))
 
   yCoordAt: (x) -> x * @slope + @yIntercept
 

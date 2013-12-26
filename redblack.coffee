@@ -11,7 +11,6 @@ class window.RedBlackTree
       if root
         @_trackNewRoot(time, root.insert(new LineSegmentRbtNode(item), true))
       else
-        # alert("wait wat")
         @_trackNewRoot(time, new LineSegmentRbtNode(item))
     # alert(@getRoot(time))
 
@@ -39,7 +38,7 @@ class window.LineSegmentRbtNode
   height: -> 1 + Math.max(@left?.height() or 0, @right?.height() or 0)
 
   insert: (newNode, isRoot = false) ->
-    comp = @line.comparePoint(newNode.line.a) or @line.comparePoint(newNode.line.b)
+    comp = @line.compareLine(newNode.line)
     # alert("#{comp} = #{@line} \\ (#{newNode.line.plusEpsilon.x}, #{newNode.line.plusEpsilon.y})")
     # alert(newNode.line.a.x + " " + comp)
     switch
@@ -50,7 +49,7 @@ class window.LineSegmentRbtNode
       # TODO: do something useful when duplicate lines are detected
 
   delete: (item) ->
-    comp = @line.comparePoint(item.a) or @line.comparePoint(item.b)
+    comp = @line.compareLine(item)
     # alert("deleting " + item.a.x)
     switch
       when comp < 0 and @left  then new LineSegmentRbtNode(@line, @left.delete(item), @right, @red)
@@ -96,4 +95,4 @@ class window.LineSegmentRbtNode
 
   _cleanUpAfterDelete: ->
 
-  toString: -> @line + (if @red then " red " else " black ") +  (if @left then " L:" + @left else "") + (if @right then " R:" + @right else "")
+  toString: -> @line + (if @red then " red " else " black ") +  (if @left then " L:" + @left else "") + "|" + (if @right then " R:" + @right else "")

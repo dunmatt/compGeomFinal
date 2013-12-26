@@ -82,7 +82,7 @@
       if (isRoot == null) {
         isRoot = false;
       }
-      comp = this.line.comparePoint(newNode.line.a) || this.line.comparePoint(newNode.line.b);
+      comp = this.line.compareLine(newNode.line);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left.insert(newNode), this.right, this.red)._cleanUpAfterInsert(isRoot);
@@ -97,7 +97,7 @@
 
     LineSegmentRbtNode.prototype["delete"] = function(item) {
       var comp;
-      comp = this.line.comparePoint(item.a) || this.line.comparePoint(item.b);
+      comp = this.line.compareLine(item);
       switch (false) {
         case !(comp < 0 && this.left):
           return new LineSegmentRbtNode(this.line, this.left["delete"](item), this.right, this.red);
@@ -154,7 +154,7 @@
     LineSegmentRbtNode.prototype._cleanUpAfterDelete = function() {};
 
     LineSegmentRbtNode.prototype.toString = function() {
-      return this.line + (this.red ? " red " : " black ") + (this.left ? " L:" + this.left : "") + (this.right ? " R:" + this.right : "");
+      return this.line + (this.red ? " red " : " black ") + (this.left ? " L:" + this.left : "") + "|" + (this.right ? " R:" + this.right : "");
     };
 
     return LineSegmentRbtNode;
