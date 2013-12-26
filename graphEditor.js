@@ -231,18 +231,19 @@
   };
 
   drawTree = function() {
-    var cx, cy, root, ry, step;
+    var cx, cy, root, ry, step, t;
     svg.selectAll(".rbtLink").remove();
-    root = tree.getRoot(d3.event.x);
+    t = d3.event.x - 10;
+    root = tree.getRoot(t);
     if (root) {
-      step = d3.event.x / (root.height());
+      step = t / (root.height());
       ry = height / 2;
-      cx = Math.max(step, root.line.a.x);
+      cx = Math.max(step, root.line.a.x + .1 * (root.line.b.x - root.line.a.x));
       cy = root.line.yCoordAt(cx);
       return drawChildren(root, {
         x: cx,
         y: cy
-      }, d3.event.x, root.height());
+      }, t, root.height());
     }
   };
 
@@ -253,7 +254,7 @@
     }
     step = (endX - start.x) / (treeHeight - depth);
     if (origin.left) {
-      cx = Math.max(start.x + step, origin.left.line.a.x);
+      cx = Math.max(start.x + step, origin.left.line.a.x + .1 * (origin.left.line.b.x - origin.left.line.a.x));
       cy = origin.left.line.yCoordAt(cx);
       gx = start.x + ((cx - start.x) / 4);
       hx = start.x + ((cx - start.x) * 3 / 4);
@@ -264,7 +265,7 @@
       }, endX, treeHeight, depth + 1);
     }
     if (origin.right) {
-      cx = Math.max(start.x + step, origin.right.line.a.x);
+      cx = Math.max(start.x + step, origin.right.line.a.x + .1 * (origin.right.line.b.x - origin.right.line.a.x));
       cy = origin.right.line.yCoordAt(cx);
       gx = start.x + ((cx - start.x) / 4);
       hx = start.x + ((cx - start.x) * 3 / 4);
@@ -331,7 +332,13 @@
   };
 
   compareEvents = function(a, b) {
-    if (a[0] === b[0]) {
+    if (a[0] === b[0] && a[2] === b[2]) {
+      if (a[1]) {
+        return -1;
+      } else {
+        return 1;
+      }
+    } else if (a[0] === b[0]) {
       if (!a[1]) {
         return -1;
       } else {

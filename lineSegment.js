@@ -7,6 +7,9 @@
       var _ref;
       this.a = a;
       this.b = b;
+      if (this.a.x === this.b.x) {
+        this.a.x -= .0001;
+      }
       if (this.a.x > this.b.x) {
         _ref = [this.b, this.a], this.a = _ref[0], this.b = _ref[1];
       }

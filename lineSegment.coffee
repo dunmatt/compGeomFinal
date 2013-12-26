@@ -1,5 +1,7 @@
 class window.LineSegment
   constructor: (@a, @b) ->
+    if @a.x is @b.x
+      @a.x -= .0001
     if @a.x > @b.x
       [@a, @b] = [@b, @a]  # all edges go left to right so that they are created before they are deleted
     @slope = (@b.y - @a.y) / (@b.x - @a.x)
