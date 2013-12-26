@@ -132,16 +132,13 @@ window.reset = ->
   drawVertices()
 
 drawTree = ->
-  d3.selectAll(".rbtLink").remove()
+  svg.selectAll(".rbtLink").remove()
   root = tree.getRoot(d3.event.x)
   if root
     step = d3.event.x / (root.height())
     ry = height / 2
     cx = Math.max(step, root.line.a.x)
     cy = root.line.yCoordAt(cx)
-    # gx = cx / 4
-    # hx = cx * 3 / 4
-    # treeGroup.append("path").attr("d", "M0 #{ry}C#{hx} #{ry} #{gx} #{cy} #{cx} #{cy}").attr("class", "rbtLink")
     drawChildren(root, {x: cx, y: cy}, d3.event.x, root.height())
 
 drawChildren = (origin, start, endX, treeHeight, depth = 1) ->
@@ -208,7 +205,7 @@ toggleEditMode = ->
   editMode = not svg.classed(editModeClass)
   svg.classed(editModeClass, editMode)
   tree = new RedBlackTree()
-  d3.selectAll(".rbtLink").remove()
+  svg.selectAll(".rbtLink").remove()
   if not editMode
     segments = lines.map((l) -> new LineSegment(l.a, l.b))
     # make a list of all the creations and all the deletions, with timestamps

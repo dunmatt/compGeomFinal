@@ -232,7 +232,7 @@
 
   drawTree = function() {
     var cx, cy, root, ry, step;
-    d3.selectAll(".rbtLink").remove();
+    svg.selectAll(".rbtLink").remove();
     root = tree.getRoot(d3.event.x);
     if (root) {
       step = d3.event.x / (root.height());
@@ -351,7 +351,7 @@
     editMode = !svg.classed(editModeClass);
     svg.classed(editModeClass, editMode);
     tree = new RedBlackTree();
-    d3.selectAll(".rbtLink").remove();
+    svg.selectAll(".rbtLink").remove();
     if (!editMode) {
       segments = lines.map(function(l) {
         return new LineSegment(l.a, l.b);
