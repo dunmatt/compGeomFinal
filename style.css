@@ -36,3 +36,16 @@ line.slabWall {
   fill: none;
   stroke: #000;
 }
+
+.right {
+  float: right;
+}
+
+.left {
+  float: left;
+}
+
+.p {
+  clear: both;
+  width: 970px;
+}
