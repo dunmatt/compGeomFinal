@@ -207,6 +207,10 @@ compareEvents = (a, b) ->
     # the past comes before the future
     if a[0] < b[0] then -1 else 1
 
+window.disableQueryMode = ->
+  if not svg.classed(editModeClass)
+    toggleEditMode()
+
 toggleEditMode = ->
   editMode = not svg.classed(editModeClass)
   svg.classed(editModeClass, editMode)

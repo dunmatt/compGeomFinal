@@ -353,6 +353,12 @@
     }
   };
 
+  window.disableQueryMode = function() {
+    if (!svg.classed(editModeClass)) {
+      return toggleEditMode();
+    }
+  };
+
   toggleEditMode = function() {
     var events, seg, segments;
     editMode = !svg.classed(editModeClass);

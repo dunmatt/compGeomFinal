@@ -58,9 +58,8 @@
   <h3>Future Work</h3>
   <ul>
     <li>Right now it doesn't show either of the two binary searches to locate the mouse, it probably ought to.</li>
-    <li>I spent entirely too much time chasing stupid issues (eg forgetting to enforce general position, coding as if a type checker had my back, forgetting an @ before a variable, etc), and ultimately there wasn't time to actually implement the optimal time bound from the paper.</li>
+    <li>I spent entirely too much time chasing stupid issues (eg forgetting to enforce general position, coding as if a type checker had my back, forgetting an @ before a variable, etc), and ultimately there wasn't time to actually implement the optimal memory bound from the paper.</li>
     <li>Right now there's no clean way to illustrate the fact that the red black tree is in fact persistent, instead the user has to move the mouse and trust that things aren't being recomputed unnecessarily... or alternatively they could press 'a' and learn to read my debugging format.</li>
-    <li>Right now the red black tree doesn't rebalance after deletions and cursory attempts to add that failed (see above regarding the lack of a type checker).</li>
   </ul>
   <h3>Gallery</h3>
   Greg's torture test:<br/>
@@ -77,6 +76,7 @@
 
   <script type="text/javascript" charset="utf-8">
   $("svg.example").click(function() {
+    disableQueryMode();
     deleteAllVertices();
     svg = $(this);
     svg.find("circle").each(function(i, e) {
